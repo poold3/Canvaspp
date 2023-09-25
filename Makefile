@@ -1,0 +1,2 @@
+main: main.cpp src/Canvaspp.cpp headers/Canvaspp.h Makefile
+	g++ -Wall -Wextra -Werror -Wno-error=unused-parameter -Wno-error=unused-variable -std=c++11 -I/home/poold/canvas++/headers -I/home/poold/canvas++/websocketpp -I/home/poold/canvas++/boost main.cpp src/Canvaspp.cpp -o main -lpthread
