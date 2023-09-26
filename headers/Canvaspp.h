@@ -6,8 +6,14 @@
 #include <thread>
 #include <mutex>
 #include <set>
+#include <stdexcept>
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
+#include <nlohmann/json.hpp>
+#include <input/Input.h>
+#include <input/Dimensions.h>
+
+using Json = nlohmann::json;
 
 typedef websocketpp::server<websocketpp::config::asio> Server;
 
@@ -18,8 +24,11 @@ private:
   std::thread thread;
   std::mutex serverMutex;
   std::mutex connectionsMutex;
+  int canvasWidth;
+  int canvasHeight;
 
-  static void MessageHandler(websocketpp::connection_hdl hdl, Server::message_ptr msg);
+  void SetDimensions(const Dimensions& dimensions);
+  void MessageHandler(websocketpp::connection_hdl hdl, Server::message_ptr msg);
   void CloseConnections();
 public:
   Canvaspp();
@@ -28,6 +37,9 @@ public:
   void Start();
   void Stop();
   int GetNumConnections();
+  bool SendJSONCommand(const std::string jsonStr);
+  static std::string JsonToStr(const Json json);
+  static Json StrToJson(const std::string str);
 };
 
 #endif
