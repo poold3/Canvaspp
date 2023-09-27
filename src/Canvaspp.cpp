@@ -5,14 +5,23 @@ void Canvaspp::SetDimensions(const Dimensions& dimensions) {
   this->canvasHeight = dimensions.GetHeight();
 }
 
+void Canvaspp::SetMousePosition(const MousePositionInput& mousePositionInput) {
+  this->mousePosition.x = mousePositionInput.GetX();
+  this->mousePosition.y = mousePositionInput.GetY();
+  std::cout << this->mousePosition.x << ", " << this->mousePosition.y << std::endl;
+}
+
 void Canvaspp::MessageHandler(websocketpp::connection_hdl hdl, Server::message_ptr msg) {
   try {
     std::cout << msg->get_payload() << std::endl;
     Json json = Canvaspp::StrToJson(msg->get_payload());
     Input input = Input::FromJson(json);
-    if (input.GetCode() == INPUT_CODE::DIMENSIONS) {
+    if (input.GetCode() == INPUT_CODE::CODE::DIMENSIONS) {
       Dimensions dimensions = Dimensions::FromJson(json);
       this->SetDimensions(dimensions);
+    } else if (input.GetCode() == INPUT_CODE::CODE::MOUSE_POSITION) {
+      MousePositionInput mousePositionInput = MousePositionInput::FromJson(json);
+      this->SetMousePosition(mousePositionInput);
     }
   } catch(const std::exception& e) {
     std::cerr << e.what() << std::endl;
@@ -31,6 +40,8 @@ void Canvaspp::CloseConnections() {
 Canvaspp::Canvaspp() {
   this->canvasWidth = 0;
   this->canvasHeight = 0;
+  this->mousePosition.x = -1;
+  this->mousePosition.y = -1;
 
   this->server.set_error_channels(websocketpp::log::elevel::all);
   this->server.set_access_channels(websocketpp::log::alevel::all);
@@ -90,7 +101,7 @@ int Canvaspp::GetNumConnections() {
   return this->connections.size();
 }
 
-bool Canvaspp::SendJSONCommand(const std::string jsonStr) {
+bool Canvaspp::SendJSON(const std::string jsonStr) {
   try {
     if (this->GetNumConnections() > 0) {
       std::lock_guard<std::mutex> serverLock(this->serverMutex);
@@ -118,4 +129,28 @@ std::string Canvaspp::JsonToStr(const Json json) {
 
 Json Canvaspp::StrToJson(const std::string str) {
   return Json::parse(str);
+}
+
+MousePosition Canvaspp::GetMousePosition() const {
+  return this->mousePosition;
+}
+
+bool Canvaspp::IsMousePositionCurrent() const {
+  return (this->mousePosition.x != -1) && (this->mousePosition.y != -1);
+}
+
+bool Canvaspp::StartUpdateMousePosition() {
+  ToggleMousePositionUpdate toggleUpdate(true);
+  Json json = ToggleMousePositionUpdate::ToJson(toggleUpdate);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+bool Canvaspp::StopUpdateMousePosition() {
+  this->mousePosition.x = -1;
+  this->mousePosition.y = -1;
+  ToggleMousePositionUpdate toggleUpdate(false);
+  Json json = ToggleMousePositionUpdate::ToJson(toggleUpdate);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
 }

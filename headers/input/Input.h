@@ -7,22 +7,25 @@
 #include <nlohmann/json.hpp>
 using Json = nlohmann::json;
 
-enum INPUT_CODE {
-  NONE,
-  DIMENSIONS,
-  MOUSE_POSITION
-};
+namespace INPUT_CODE {
+  enum CODE {
+    NONE,
+    DIMENSIONS,
+    MOUSE_POSITION
+  };
+}
+
 
 class Input {
 private:
-  INPUT_CODE code;
+  INPUT_CODE::CODE code;
 protected:
-  static INPUT_CODE FindInputCode(int code);
+  static INPUT_CODE::CODE FindInputCode(int code);
 public:
   Input();
-  Input(INPUT_CODE code);
+  Input(INPUT_CODE::CODE code);
   ~Input();
-  INPUT_CODE GetCode() const;
+  INPUT_CODE::CODE GetCode() const;
   static Input FromJson(const Json& json);
   static Json ToJson(const Input& input);
 };

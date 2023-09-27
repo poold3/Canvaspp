@@ -1,27 +1,27 @@
 #include "input/Input.h"
 
-INPUT_CODE Input::FindInputCode(int code) {
-  for (int i = static_cast<int>(INPUT_CODE::NONE); i <= static_cast<int>(INPUT_CODE::MOUSE_POSITION); ++i) {
+INPUT_CODE::CODE Input::FindInputCode(int code) {
+  for (int i = static_cast<int>(INPUT_CODE::CODE::NONE); i <= static_cast<int>(INPUT_CODE::CODE::MOUSE_POSITION); ++i) {
     if (i == code) {
-      return static_cast<INPUT_CODE>(i);
+      return static_cast<INPUT_CODE::CODE>(i);
     }
   }
-  return INPUT_CODE::NONE;
+  return INPUT_CODE::CODE::NONE;
 }
 
 Input::Input() {
-  this->code = INPUT_CODE::NONE;
+  this->code = INPUT_CODE::CODE::NONE;
 }
 
-Input::Input(INPUT_CODE code) {
+Input::Input(INPUT_CODE::CODE code) {
   this->code = code;
 }
 
 Input::~Input() {
-  this->code = INPUT_CODE::NONE;
+  this->code = INPUT_CODE::CODE::NONE;
 }
 
-INPUT_CODE Input::GetCode() const {
+INPUT_CODE::CODE Input::GetCode() const {
   return this->code;
 }
 

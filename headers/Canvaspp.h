@@ -12,10 +12,18 @@
 #include <nlohmann/json.hpp>
 #include <input/Input.h>
 #include <input/Dimensions.h>
+#include <input/MousePosition.h>
+#include <output/Output.h>
+#include <output/ToggleMousePositionUpdate.h>
 
 using Json = nlohmann::json;
 
 typedef websocketpp::server<websocketpp::config::asio> Server;
+
+struct MousePosition {
+  int x;
+  int y;
+};
 
 class Canvaspp {
 private:
@@ -26,8 +34,10 @@ private:
   std::mutex connectionsMutex;
   int canvasWidth;
   int canvasHeight;
+  MousePosition mousePosition;
 
   void SetDimensions(const Dimensions& dimensions);
+  void SetMousePosition(const MousePositionInput& mousePositionInput);
   void MessageHandler(websocketpp::connection_hdl hdl, Server::message_ptr msg);
   void CloseConnections();
 public:
@@ -37,9 +47,13 @@ public:
   void Start();
   void Stop();
   int GetNumConnections();
-  bool SendJSONCommand(const std::string jsonStr);
+  bool SendJSON(const std::string jsonStr);
   static std::string JsonToStr(const Json json);
   static Json StrToJson(const std::string str);
+  MousePosition GetMousePosition() const;
+  bool IsMousePositionCurrent() const;
+  bool StartUpdateMousePosition();
+  bool StopUpdateMousePosition();
 };
 
 #endif

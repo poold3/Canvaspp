@@ -9,7 +9,7 @@ private:
   int height;
 public:
   Dimensions();
-  Dimensions(INPUT_CODE code, int width, int height);
+  Dimensions(int width, int height);
   ~Dimensions();
   int GetWidth() const;
   int GetHeight() const;

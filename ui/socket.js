@@ -1,7 +1,12 @@
-const INPUT_CODES = {
+const OUTPUT_CODE = {
   NONE: 0,
   DIMENSIONS: 1,
   MOUSE_POSITION: 2
+}
+
+const INPUT_CODE = {
+  NONE: 0,
+  TOGGLE_MOUSE_POSITION_TRANSMISSION: 1
 }
 
 const canvas = document.getElementById("canvas");
@@ -16,7 +21,25 @@ function sendToServer(object) {
 
 function handleWebSocketMessage(event) {
   console.log('Message from server:', event.data);
-  eval(event.data);
+  const obj = JSON.parse(event.data);
+  if (obj.code == INPUT_CODE.TOGGLE_MOUSE_POSITION_TRANSMISSION) {
+    if (obj.update == true) {
+      canvas.addEventListener("mousemove", trackMousePosition);
+    } else {
+      canvas.removeEventListener("mousemove", trackMousePosition);
+    }
+  }
+}
+
+function trackMousePosition(event) {
+  if (socket != null && socket.readyState == 1) {
+    mousePosition = {
+      "code": OUTPUT_CODE.MOUSE_POSITION,
+      "x": event.clientX,
+      "y": event.clientY
+    }
+    sendToServer(mousePosition);
+  }
 }
 
 function adjustCanvasSize() {
@@ -24,7 +47,7 @@ function adjustCanvasSize() {
   canvas.height = window.innerHeight;
   if (socket != null && socket.readyState == 1) {
     dimensions = {
-      "code": INPUT_CODES.DIMENSIONS,
+      "code": OUTPUT_CODE.DIMENSIONS,
       "width": canvas.width,
       "height": canvas.height
     }
