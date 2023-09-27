@@ -33,6 +33,7 @@ private:
   void SetMousePosition(const MousePosition& mousePosition);
   void MessageHandler(websocketpp::connection_hdl hdl, Server::message_ptr msg);
   void CloseConnections();
+  bool SendJSON(const std::string jsonStr);
 public:
   Canvaspp();
   ~Canvaspp();
@@ -40,7 +41,6 @@ public:
   void Start();
   void Stop();
   int GetNumConnections();
-  bool SendJSON(const std::string jsonStr);
   static std::string JsonToStr(const Json json);
   static Json StrToJson(const std::string str);
   MousePosition GetMousePosition() const;
