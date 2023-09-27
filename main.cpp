@@ -10,9 +10,11 @@ int main() {
     canvaspp.ShowCanvas();
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
-    canvaspp.StartUpdateMousePosition();
+    canvaspp.SetUpdateMousePosition(true);
     std::this_thread::sleep_for(std::chrono::seconds(5));
-    canvaspp.StopUpdateMousePosition();
+    std::cout << canvaspp.IsMousePositionCurrent() << std::endl;
+    canvaspp.SetUpdateMousePosition(false);
+    std::cout << canvaspp.IsMousePositionCurrent() << std::endl;
     while (canvaspp.GetNumConnections() != 0) {
       
     }

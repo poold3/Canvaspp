@@ -7,23 +7,17 @@
 #include <mutex>
 #include <set>
 #include <stdexcept>
+
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
 #include <nlohmann/json.hpp>
-#include <input/Input.h>
-#include <input/Dimensions.h>
-#include <input/MousePosition.h>
-#include <output/Output.h>
-#include <output/ToggleMousePositionUpdate.h>
+
+#include <Input.h>
+#include <Output.h>
 
 using Json = nlohmann::json;
 
 typedef websocketpp::server<websocketpp::config::asio> Server;
-
-struct MousePosition {
-  int x;
-  int y;
-};
 
 class Canvaspp {
 private:
@@ -32,12 +26,11 @@ private:
   std::thread thread;
   std::mutex serverMutex;
   std::mutex connectionsMutex;
-  int canvasWidth;
-  int canvasHeight;
+  Dimensions dimensions;
   MousePosition mousePosition;
 
   void SetDimensions(const Dimensions& dimensions);
-  void SetMousePosition(const MousePositionInput& mousePositionInput);
+  void SetMousePosition(const MousePosition& mousePosition);
   void MessageHandler(websocketpp::connection_hdl hdl, Server::message_ptr msg);
   void CloseConnections();
 public:
@@ -52,8 +45,7 @@ public:
   static Json StrToJson(const std::string str);
   MousePosition GetMousePosition() const;
   bool IsMousePositionCurrent() const;
-  bool StartUpdateMousePosition();
-  bool StopUpdateMousePosition();
+  bool SetUpdateMousePosition(bool update);
 };
 
 #endif
