@@ -18,6 +18,10 @@ void Canvaspp::MessageHandler(websocketpp::connection_hdl hdl, Server::message_p
       this->SetDimensions(Input::GetDimensions(json));
     } else if (inputCode == INPUT_CODE::CODE::MOUSE_POSITION) {
       this->SetMousePosition(Input::GetMousePosition(json));
+    } else if (inputCode == INPUT_CODE::CODE::MOUSE_CLICK) {
+      if (this->mouseClickLambda != nullptr) {
+        this->mouseClickLambda(Input::GetMouseClick(json));
+      }
     }
 
   } catch(const std::exception& e) {
@@ -140,4 +144,18 @@ bool Canvaspp::SetUpdateMousePosition(bool update) {
   Json json = Output::GetUpdateMousePosition(updateMousePosition);
   std::string jsonStr = Canvaspp::JsonToStr(json);
   return this->SendJSON(jsonStr);
+}
+
+bool Canvaspp::SetTrackMouseClick(bool track) {
+  if (!track) {
+    this->mouseClickLambda = nullptr;
+  }
+  TrackMouseClick trackMouseClick(track);
+  Json json = Output::GetTrackMouseClick(trackMouseClick);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+void Canvaspp::SetMouseClickHandler(MouseClickLambda mouseClickLambda) {
+  this->mouseClickLambda = mouseClickLambda;
 }

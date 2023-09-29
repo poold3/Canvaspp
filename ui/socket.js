@@ -1,12 +1,14 @@
 const OUTPUT_CODE = {
   NONE: 0,
   DIMENSIONS: 1,
-  MOUSE_POSITION: 2
+  MOUSE_POSITION: 2,
+  MOUSE_CLICK: 3
 }
 
 const INPUT_CODE = {
   NONE: 0,
-  TOGGLE_MOUSE_POSITION_TRANSMISSION: 1
+  TOGGLE_MOUSE_POSITION_TRANSMISSION: 1,
+  TRACK_MOUSE_CLICK: 2
 }
 
 const canvas = document.getElementById("canvas");
@@ -28,6 +30,23 @@ function handleWebSocketMessage(event) {
     } else {
       canvas.removeEventListener("mousemove", trackMousePosition);
     }
+  } else if (obj.code == INPUT_CODE.TRACK_MOUSE_CLICK) {
+    if (obj.track == true) {
+      canvas.addEventListener("click", trackMouseClick);
+    } else {
+      canvas.removeEventListener("click", trackMouseClick);
+    }
+  }
+}
+
+function trackMouseClick(event) {
+  if (socket != null && socket.readyState == 1) {
+    mouseClick = {
+      "code": OUTPUT_CODE.MOUSE_CLICK,
+      "x": event.clientX,
+      "y": event.clientY
+    }
+    sendToServer(mouseClick);
   }
 }
 

@@ -11,7 +11,8 @@ namespace INPUT_CODE {
   enum CODE {
     NONE,
     DIMENSIONS,
-    MOUSE_POSITION
+    MOUSE_POSITION,
+    MOUSE_CLICK
   };
 }
 
@@ -41,12 +42,26 @@ struct MousePosition {
   }
 };
 
+struct MouseClick {
+  int x;
+  int y;
+  MouseClick() {
+    this->x = -1;
+    this->y = -1;
+  }
+  MouseClick(int x, int y) {
+    this->x = x;
+    this->y = y;
+  }
+};
+
 class Input {
 public:
   static INPUT_CODE::CODE FindInputCode(int code);
   static INPUT_CODE::CODE GetInputCode(const Json& json);
   static Dimensions GetDimensions(const Json& json);
   static MousePosition GetMousePosition(const Json& json);
+  static MouseClick GetMouseClick(const Json& json);
 };
 
 #endif

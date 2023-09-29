@@ -18,6 +18,7 @@
 using Json = nlohmann::json;
 
 typedef websocketpp::server<websocketpp::config::asio> Server;
+typedef void(*MouseClickLambda)(MouseClick mouseClick);
 
 class Canvaspp {
 private:
@@ -28,6 +29,7 @@ private:
   std::mutex connectionsMutex;
   Dimensions dimensions;
   MousePosition mousePosition;
+  MouseClickLambda mouseClickLambda = nullptr;
 
   void SetDimensions(const Dimensions& dimensions);
   void SetMousePosition(const MousePosition& mousePosition);
@@ -46,6 +48,8 @@ public:
   MousePosition GetMousePosition() const;
   bool IsMousePositionCurrent() const;
   bool SetUpdateMousePosition(bool update);
+  bool SetTrackMouseClick(bool track);
+  void SetMouseClickHandler(MouseClickLambda mouseClickLambda);
 };
 
 #endif

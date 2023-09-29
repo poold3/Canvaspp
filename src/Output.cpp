@@ -1,7 +1,7 @@
 #include "Output.h"
 
 OUTPUT_CODE::CODE Output::FindOutputCode(int code) {
-  for (int i = static_cast<int>(OUTPUT_CODE::CODE::NONE); i <= static_cast<int>(OUTPUT_CODE::CODE::UPDATE_MOUSE_POSITION); ++i) {
+  for (int i = static_cast<int>(OUTPUT_CODE::CODE::NONE); i <= static_cast<int>(OUTPUT_CODE::CODE::TRACK_MOUSE_CLICK); ++i) {
     if (i == code) {
       return static_cast<OUTPUT_CODE::CODE>(i);
     }
@@ -21,5 +21,12 @@ Json Output::GetUpdateMousePosition(const UpdateMousePosition& updateMousePositi
   Json json;
   json["code"] = OUTPUT_CODE::CODE::UPDATE_MOUSE_POSITION;
   json["update"] = updateMousePosition.update;
+  return json;
+}
+
+Json Output::GetTrackMouseClick(const TrackMouseClick& trackMouseClick) {
+  Json json;
+  json["code"] = OUTPUT_CODE::CODE::TRACK_MOUSE_CLICK;
+  json["track"] = trackMouseClick.track;
   return json;
 }
