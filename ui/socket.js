@@ -7,8 +7,9 @@ const OUTPUT_CODE = {
 
 const INPUT_CODE = {
   NONE: 0,
-  TOGGLE_MOUSE_POSITION_TRANSMISSION: 1,
-  TRACK_MOUSE_CLICK: 2
+  UPDATE_MOUSE_POSITION: 1,
+  TRACK_MOUSE_CLICK: 2,
+  CTX_COMMAND: 3
 }
 
 const canvas = document.getElementById("canvas");
@@ -24,7 +25,7 @@ function sendToServer(object) {
 function handleWebSocketMessage(event) {
   console.log('Message from server:', event.data);
   const obj = JSON.parse(event.data);
-  if (obj.code == INPUT_CODE.TOGGLE_MOUSE_POSITION_TRANSMISSION) {
+  if (obj.code == INPUT_CODE.UPDATE_MOUSE_POSITION) {
     if (obj.update == true) {
       canvas.addEventListener("mousemove", trackMousePosition);
     } else {
@@ -36,6 +37,8 @@ function handleWebSocketMessage(event) {
     } else {
       canvas.removeEventListener("click", trackMouseClick);
     }
+  } else if (obj.code == INPUT_CODE.CTX_COMMAND) {
+    console.log(obj.command);
   }
 }
 

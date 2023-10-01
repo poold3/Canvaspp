@@ -50,6 +50,7 @@ public:
   bool SetUpdateMousePosition(bool update);
   bool SetTrackMouseClick(bool track);
   void SetMouseClickHandler(MouseClickLambda mouseClickLambda);
+  bool SendCtxCommand(std::string command);
 };
 
 #endif

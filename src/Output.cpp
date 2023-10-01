@@ -1,7 +1,7 @@
 #include "Output.h"
 
 OUTPUT_CODE::CODE Output::FindOutputCode(int code) {
-  for (int i = static_cast<int>(OUTPUT_CODE::CODE::NONE); i <= static_cast<int>(OUTPUT_CODE::CODE::TRACK_MOUSE_CLICK); ++i) {
+  for (int i = static_cast<int>(OUTPUT_CODE::CODE::NONE); i <= static_cast<int>(OUTPUT_CODE::CODE::CTX_COMMAND); ++i) {
     if (i == code) {
       return static_cast<OUTPUT_CODE::CODE>(i);
     }
@@ -28,5 +28,12 @@ Json Output::GetTrackMouseClick(const TrackMouseClick& trackMouseClick) {
   Json json;
   json["code"] = OUTPUT_CODE::CODE::TRACK_MOUSE_CLICK;
   json["track"] = trackMouseClick.track;
+  return json;
+}
+
+Json Output::GetCtxCommand(const CtxCommand& ctxCommand) {
+  Json json;
+  json["code"] = OUTPUT_CODE::CODE::CTX_COMMAND;
+  json["command"] = ctxCommand.command;
   return json;
 }

@@ -159,3 +159,10 @@ bool Canvaspp::SetTrackMouseClick(bool track) {
 void Canvaspp::SetMouseClickHandler(MouseClickLambda mouseClickLambda) {
   this->mouseClickLambda = mouseClickLambda;
 }
+
+bool Canvaspp::SendCtxCommand(std::string command) {
+  CtxCommand ctxCommand(command);
+  Json json = Output::GetCtxCommand(ctxCommand);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}

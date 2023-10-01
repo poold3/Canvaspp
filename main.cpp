@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "Canvaspp.h"
+#include "CtxCommandBuilder.h"
 
 MouseClickLambda mouseClickHandler = [](MouseClick click) {
   std::cout << click.x << ", " << click.y << std::endl;
@@ -9,27 +10,22 @@ MouseClickLambda mouseClickHandler = [](MouseClick click) {
 int main() {
   try {
     
+    /*
     Canvaspp canvaspp;
     canvaspp.Start();
     canvaspp.ShowCanvas();
-    
-    canvaspp.SetTrackMouseClick(true);
-
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-
-    canvaspp.SetMouseClickHandler(mouseClickHandler);
-
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-
-    canvaspp.SetTrackMouseClick(false);
-
 
     while (canvaspp.GetNumConnections() != 0) {
       
     }
   
     canvaspp.Stop();
-    
+    */
+    CtxCommandBuilder ctxBuilder;
+    ctxBuilder.textAlign("right").lineCap("square").font("bold 48px serif").lineWidth(15);
+    std::cout << ctxBuilder.ToString() << std:: endl;
+    ctxBuilder.Clear();
+    std::cout << ctxBuilder.ToString() << std:: endl;
   } catch(const std::exception& e) {
     std::cerr << e.what() << std::endl;
   }
