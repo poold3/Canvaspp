@@ -46,6 +46,7 @@ public:
   static std::string JsonToStr(const Json json);
   static Json StrToJson(const std::string str);
   MousePosition GetMousePosition() const;
+  Dimensions GetDimensions() const;
   bool IsMousePositionCurrent() const;
   bool SetUpdateMousePosition(bool update);
   bool SetTrackMouseClick(bool track);

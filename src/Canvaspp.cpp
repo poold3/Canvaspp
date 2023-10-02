@@ -131,6 +131,10 @@ MousePosition Canvaspp::GetMousePosition() const {
   return this->mousePosition;
 }
 
+Dimensions Canvaspp::GetDimensions() const {
+  return this->dimensions;
+}
+
 bool Canvaspp::IsMousePositionCurrent() const {
   return (this->mousePosition.x != -1) && (this->mousePosition.y != -1);
 }

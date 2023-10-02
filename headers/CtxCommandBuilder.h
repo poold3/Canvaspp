@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <stdexcept>
+#include <cmath>
 
 struct Color {
   int r,g,b;
@@ -25,6 +26,8 @@ struct Color {
     return "rgba(" + std::to_string(r) + "," + std::to_string(g) + "," + std::to_string(b) + "," + std::to_string(a) + ")";
   }
 };
+
+const double PI = 2 * std::acos(0.0);
 
 class CtxCommandBuilder {
 private:
@@ -62,7 +65,10 @@ public:
   CtxCommandBuilder& wordSpacing(int pixels);
 
   // ctx instance methods
-  
+  CtxCommandBuilder& clearRect(int x, int y, int width, int height);
+  CtxCommandBuilder& fillRect(int x, int y, int width, int height);
+  CtxCommandBuilder& rect(int x, int y, int width, int height);
+  CtxCommandBuilder& rotate(double degrees);
 };
 
 #endif

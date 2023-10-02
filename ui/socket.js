@@ -38,7 +38,8 @@ function handleWebSocketMessage(event) {
       canvas.removeEventListener("click", trackMouseClick);
     }
   } else if (obj.code == INPUT_CODE.CTX_COMMAND) {
-    console.log(obj.command);
+    //console.log(obj.command);
+    eval(obj.command);
   }
 }
 

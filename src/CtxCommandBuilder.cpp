@@ -169,3 +169,25 @@ CtxCommandBuilder& CtxCommandBuilder::wordSpacing(int pixels) {
   return *this;
 }
 
+// Instance Methods
+
+CtxCommandBuilder& CtxCommandBuilder::clearRect(int x, int y, int width, int height) {
+  this->buffer.append("ctx.clearRect(" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(width) + "," + std::to_string(height) + ");");
+  return *this;
+}
+
+CtxCommandBuilder& CtxCommandBuilder::fillRect(int x, int y, int width, int height) {
+  this->buffer.append("ctx.fillRect(" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(width) + "," + std::to_string(height) + ");");
+  return *this;
+}
+
+CtxCommandBuilder& CtxCommandBuilder::rect(int x, int y, int width, int height) {
+  this->buffer.append("ctx.rect(" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(width) + "," + std::to_string(height) + ");");
+  return *this;
+}
+
+CtxCommandBuilder& CtxCommandBuilder::rotate(double degrees) {
+  double radians = (degrees * PI) / 180.0;
+  this->buffer.append("ctx.rotate(" + std::to_string(radians) + ");");
+  return *this;
+}
