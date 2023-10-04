@@ -1,7 +1,7 @@
 #include "Output.h"
 
 OUTPUT_CODE::CODE Output::FindOutputCode(int code) {
-  for (int i = static_cast<int>(OUTPUT_CODE::CODE::NONE); i <= static_cast<int>(OUTPUT_CODE::CODE::CTX_COMMAND); ++i) {
+  for (int i = static_cast<int>(OUTPUT_CODE::CODE::NONE); i <= static_cast<int>(OUTPUT_CODE::CODE::LOAD_IMAGE); ++i) {
     if (i == code) {
       return static_cast<OUTPUT_CODE::CODE>(i);
     }
@@ -35,5 +35,13 @@ Json Output::GetCtxCommand(const CtxCommand& ctxCommand) {
   Json json;
   json["code"] = OUTPUT_CODE::CODE::CTX_COMMAND;
   json["command"] = ctxCommand.command;
+  return json;
+}
+
+Json Output::GetLoadImage(const LoadImage& loadImage) {
+  Json json;
+  json["code"] = OUTPUT_CODE::CODE::LOAD_IMAGE;
+  json["name"] = loadImage.name;
+  json["src"] = loadImage.src;
   return json;
 }

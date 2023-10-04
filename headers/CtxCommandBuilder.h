@@ -65,10 +65,36 @@ public:
   CtxCommandBuilder& wordSpacing(int pixels);
 
   // ctx instance methods
+  CtxCommandBuilder& arc(int x, int y, int radius, double startAngle, double endAngle, bool counterclockwise = false);
+  CtxCommandBuilder& arcTo(int x1, int y1, int x2, int y2, int radius);
+  CtxCommandBuilder& beginPath();
+  CtxCommandBuilder& bezierCurveTo(int cp1x, int cp1y, int cp2x, int cp2y, int x, int y);
   CtxCommandBuilder& clearRect(int x, int y, int width, int height);
+  CtxCommandBuilder& closePath();
+  CtxCommandBuilder& drawImage(std::string imageName, int dx, int dy);
+  CtxCommandBuilder& drawImage(std::string imageName, int dx, int dy, int dWidth, int dHeight);
+  CtxCommandBuilder& drawImage(std::string imageName, int sx, int sy, int sWidth, int sHeight, int dx, int dy, int dWidth, int dHeight);
+  CtxCommandBuilder& fill();
   CtxCommandBuilder& fillRect(int x, int y, int width, int height);
+  CtxCommandBuilder& fillText(std::string text, int x, int y, int maxWidth = 0);
+  CtxCommandBuilder& lineTo(int x, int y);
+  CtxCommandBuilder& moveTo(int x, int y);
+  CtxCommandBuilder& quadraticCurveTo(int cpx, int cpy, int x, int y);
   CtxCommandBuilder& rect(int x, int y, int width, int height);
+  CtxCommandBuilder& reset();
+  CtxCommandBuilder& resetTransform();
+  CtxCommandBuilder& restore();
   CtxCommandBuilder& rotate(double degrees);
+  CtxCommandBuilder& roundRect(int x, int y, int width, int height, int radii);
+  CtxCommandBuilder& save();
+  CtxCommandBuilder& scale(int x, int y);
+  CtxCommandBuilder& setLineDash(int segments[], int segmentsLength);
+  CtxCommandBuilder& setTransform(double a, double b, double c, double d, double e, double f);
+  CtxCommandBuilder& stroke();
+  CtxCommandBuilder& strokeRect(int x, int y, int width, int height);
+  CtxCommandBuilder& strokeText(std::string text, int x, int y, int maxWidth = 0);
+  CtxCommandBuilder& transform(double a, double b, double c, double d, double e, double f);
+  CtxCommandBuilder& translate(int x, int y);
 };
 
 #endif

@@ -12,7 +12,8 @@ namespace INPUT_CODE {
     NONE,
     DIMENSIONS,
     MOUSE_POSITION,
-    MOUSE_CLICK
+    MOUSE_CLICK,
+    IMAGE_LOADED
   };
 }
 
@@ -55,6 +56,16 @@ struct MouseClick {
   }
 };
 
+struct ImageLoaded {
+  std::string name;
+  ImageLoaded() {
+    this->name = "";
+  }
+  ImageLoaded(std::string name) {
+    this->name = name;
+  }
+};
+
 class Input {
 public:
   static INPUT_CODE::CODE FindInputCode(int code);
@@ -62,6 +73,7 @@ public:
   static Dimensions GetDimensions(const Json& json);
   static MousePosition GetMousePosition(const Json& json);
   static MouseClick GetMouseClick(const Json& json);
+  static ImageLoaded GetImageLoaded(const Json& json);
 };
 
 #endif

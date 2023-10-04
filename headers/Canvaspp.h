@@ -7,6 +7,8 @@
 #include <mutex>
 #include <set>
 #include <stdexcept>
+#include <map>
+#include <chrono>
 
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
@@ -27,12 +29,16 @@ private:
   std::thread thread;
   std::mutex serverMutex;
   std::mutex connectionsMutex;
+  std::mutex imagesLoadedMutex;
   Dimensions dimensions;
   MousePosition mousePosition;
   MouseClickLambda mouseClickLambda = nullptr;
+  std::map<std::string, bool> imagesLoaded;
 
+  std::chrono::_V2::system_clock::time_point GetCurrentTime() const;
   void SetDimensions(const Dimensions& dimensions);
   void SetMousePosition(const MousePosition& mousePosition);
+  void SetImageLoaded(const ImageLoaded& imageLoaded);
   void MessageHandler(websocketpp::connection_hdl hdl, Server::message_ptr msg);
   void CloseConnections();
   bool SendJSON(const std::string jsonStr);
@@ -52,6 +58,8 @@ public:
   bool SetTrackMouseClick(bool track);
   void SetMouseClickHandler(MouseClickLambda mouseClickLambda);
   bool SendCtxCommand(std::string command);
+  bool AddImage(std::string name, std::string src);
+  bool IsImageLoaded(std::string name);
 };
 
 #endif

@@ -12,7 +12,8 @@ namespace OUTPUT_CODE {
     NONE,
     UPDATE_MOUSE_POSITION,
     TRACK_MOUSE_CLICK,
-    CTX_COMMAND
+    CTX_COMMAND,
+    LOAD_IMAGE
   };
 }
 
@@ -46,6 +47,19 @@ struct CtxCommand {
   }
 };
 
+struct LoadImage {
+  std::string name;
+  std::string src;
+  LoadImage() {
+    this->name = "";
+    this->src = "";
+  }
+  LoadImage(std::string name, std::string src) {
+    this->name = name;
+    this->src = src;
+  }
+};
+
 class Output {
 public:
   static OUTPUT_CODE::CODE FindOutputCode(int code);
@@ -53,5 +67,6 @@ public:
   static Json GetUpdateMousePosition(const UpdateMousePosition& updateMousePosition);
   static Json GetTrackMouseClick(const TrackMouseClick& trackMouseClick);
   static Json GetCtxCommand(const CtxCommand& ctxCommand);
+  static Json GetLoadImage(const LoadImage& loadImage);
 };
 #endif

@@ -2,15 +2,19 @@ const OUTPUT_CODE = {
   NONE: 0,
   DIMENSIONS: 1,
   MOUSE_POSITION: 2,
-  MOUSE_CLICK: 3
+  MOUSE_CLICK: 3,
+  IMAGE_LOADED: 4
 }
 
 const INPUT_CODE = {
   NONE: 0,
   UPDATE_MOUSE_POSITION: 1,
   TRACK_MOUSE_CLICK: 2,
-  CTX_COMMAND: 3
+  CTX_COMMAND: 3,
+  LOAD_IMAGE: 4
 }
+
+const images = {};
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -25,7 +29,9 @@ function sendToServer(object) {
 function handleWebSocketMessage(event) {
   console.log('Message from server:', event.data);
   const obj = JSON.parse(event.data);
-  if (obj.code == INPUT_CODE.UPDATE_MOUSE_POSITION) {
+  if (obj.code == INPUT_CODE.CTX_COMMAND) {
+    eval?.(`"use strict";${obj.command}`);
+  } else if (obj.code == INPUT_CODE.UPDATE_MOUSE_POSITION) {
     if (obj.update == true) {
       canvas.addEventListener("mousemove", trackMousePosition);
     } else {
@@ -37,9 +43,23 @@ function handleWebSocketMessage(event) {
     } else {
       canvas.removeEventListener("click", trackMouseClick);
     }
-  } else if (obj.code == INPUT_CODE.CTX_COMMAND) {
-    //console.log(obj.command);
-    eval(obj.command);
+  } else if (obj.code == INPUT_CODE.LOAD_IMAGE) {
+    const img = new Image();
+    img.src = obj.src;
+    img.addEventListener("load", (event) => {
+      sendImageLoaded(obj.name);
+    });
+    images[obj.name] = img;
+  }
+}
+
+function sendImageLoaded(name) {
+  if (socket != null && socket.readyState == 1) {
+    imageLoaded = {
+      "code": OUTPUT_CODE.IMAGE_LOADED,
+      "name": name
+    }
+    sendToServer(imageLoaded);
   }
 }
 
@@ -79,6 +99,12 @@ function adjustCanvasSize() {
 }
 
 window.addEventListener("resize", adjustCanvasSize);
+
+window.addEventListener("beforeunload", (event) => {
+  if (socket != null && socket.readyState == 1) {
+    socket.close();
+  }
+});
 
 function connectWebSocket() {
   socket = new WebSocket("ws://localhost:65000");

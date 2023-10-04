@@ -1,11 +1,22 @@
 #include "Canvaspp.h"
 
+std::chrono::_V2::system_clock::time_point Canvaspp::GetCurrentTime() const {
+  return std::chrono::high_resolution_clock::now();
+}
+
 void Canvaspp::SetDimensions(const Dimensions& dimensions) {
   this->dimensions = dimensions;
 }
 
 void Canvaspp::SetMousePosition(const MousePosition& mousePosition) {
   this->mousePosition = mousePosition;
+}
+
+void Canvaspp::SetImageLoaded(const ImageLoaded& imageLoaded) {
+  std::lock_guard<std::mutex> serverLock(this->imagesLoadedMutex);
+  if (this->imagesLoaded.count(imageLoaded.name) == 1) {
+    this->imagesLoaded.at(imageLoaded.name) = true;
+  }
 }
 
 void Canvaspp::MessageHandler(websocketpp::connection_hdl hdl, Server::message_ptr msg) {
@@ -22,6 +33,8 @@ void Canvaspp::MessageHandler(websocketpp::connection_hdl hdl, Server::message_p
       if (this->mouseClickLambda != nullptr) {
         this->mouseClickLambda(Input::GetMouseClick(json));
       }
+    } else if (inputCode == INPUT_CODE::CODE::IMAGE_LOADED) {
+      this->SetImageLoaded(Input::GetImageLoaded(json));
     }
 
   } catch(const std::exception& e) {
@@ -69,8 +82,11 @@ void Canvaspp::ShowCanvas() {
   std::system(command.c_str());
 
   //Await Canvas Connection
+  auto start = this->GetCurrentTime();
   while (this->GetNumConnections() == currentConnections) {
-
+    if (std::chrono::duration_cast<std::chrono::milliseconds>(this->GetCurrentTime() - start) >= std::chrono::seconds(10)) {
+      throw std::runtime_error("Failed to show and connect canvas.");
+    }
   }
 }
 
@@ -169,4 +185,24 @@ bool Canvaspp::SendCtxCommand(std::string command) {
   Json json = Output::GetCtxCommand(ctxCommand);
   std::string jsonStr = Canvaspp::JsonToStr(json);
   return this->SendJSON(jsonStr);
+}
+
+bool Canvaspp::AddImage(std::string name, std::string src) {
+  std::lock_guard<std::mutex> serverLock(this->imagesLoadedMutex);
+  if (this->imagesLoaded.count(name) == 1) {
+    throw std::invalid_argument("This image already exists.");
+  }
+  this->imagesLoaded.insert(std::pair<std::string, bool>(name, false));
+  LoadImage loadImage(name, src);
+  Json json = Output::GetLoadImage(loadImage);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+bool Canvaspp::IsImageLoaded(std::string name) {
+  std::lock_guard<std::mutex> serverLock(this->imagesLoadedMutex);
+  if (this->imagesLoaded.count(name) != 1) {
+    throw std::invalid_argument("This image does not exist.");
+  }
+  return this->imagesLoaded.at(name);
 }
