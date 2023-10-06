@@ -1,7 +1,7 @@
 #include "Input.h"
 
 INPUT_CODE::CODE Input::FindInputCode(int code) {
-  for (int i = static_cast<int>(INPUT_CODE::CODE::NONE); i <= static_cast<int>(INPUT_CODE::CODE::IMAGE_LOADED); ++i) {
+  for (int i = static_cast<int>(INPUT_CODE::CODE::NONE); i <= static_cast<int>(INPUT_CODE::CODE::SOUND_LOADED); ++i) {
     if (i == code) {
       return static_cast<INPUT_CODE::CODE>(i);
     }
@@ -66,4 +66,14 @@ ImageLoaded Input::GetImageLoaded(const Json& json) {
   std::string name = json.at("name");
 
   return ImageLoaded(name);
+}
+
+SoundLoaded Input::GetSoundLoaded(const Json& json) {
+  if (!json.at("name").is_string()) {
+    throw std::invalid_argument("The \"x\" field is not a number.");
+  }
+
+  std::string name = json.at("name");
+
+  return SoundLoaded(name);
 }

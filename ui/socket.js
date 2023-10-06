@@ -3,7 +3,8 @@ const OUTPUT_CODE = {
   DIMENSIONS: 1,
   MOUSE_POSITION: 2,
   MOUSE_CLICK: 3,
-  IMAGE_LOADED: 4
+  IMAGE_LOADED: 4,
+  SOUND_LOADED: 5
 }
 
 const INPUT_CODE = {
@@ -11,10 +12,16 @@ const INPUT_CODE = {
   UPDATE_MOUSE_POSITION: 1,
   TRACK_MOUSE_CLICK: 2,
   CTX_COMMAND: 3,
-  LOAD_IMAGE: 4
+  LOAD_IMAGE: 4,
+  SET_BACKGROUND_COLOR: 5,
+  SET_CURSOR: 6,
+  ADD_SOUND: 7,
+  PLAY_SOUND: 8,
+  PAUSE_SOUND: 9
 }
 
 const images = {};
+const sounds = {};
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -31,18 +38,21 @@ function handleWebSocketMessage(event) {
   const obj = JSON.parse(event.data);
   if (obj.code == INPUT_CODE.CTX_COMMAND) {
     eval?.(`"use strict";${obj.command}`);
+
   } else if (obj.code == INPUT_CODE.UPDATE_MOUSE_POSITION) {
     if (obj.update == true) {
       canvas.addEventListener("mousemove", trackMousePosition);
     } else {
       canvas.removeEventListener("mousemove", trackMousePosition);
     }
+
   } else if (obj.code == INPUT_CODE.TRACK_MOUSE_CLICK) {
     if (obj.track == true) {
       canvas.addEventListener("click", trackMouseClick);
     } else {
       canvas.removeEventListener("click", trackMouseClick);
     }
+
   } else if (obj.code == INPUT_CODE.LOAD_IMAGE) {
     const img = new Image();
     img.src = obj.src;
@@ -50,6 +60,49 @@ function handleWebSocketMessage(event) {
       sendImageLoaded(obj.name);
     });
     images[obj.name] = img;
+
+  } else if (obj.code == INPUT_CODE.SET_BACKGROUND_COLOR) {
+    canvas.style.backgroundColor = obj.color;
+
+  } else if (obj.code == INPUT_CODE.SET_CURSOR) {
+    canvas.style.cursor = obj.cursor;
+
+  } else if (obj.code == INPUT_CODE.ADD_SOUND) {
+    const newSound = document.createElement("audio");
+    if (newSound.canPlayType("audio/mpeg")) {
+      function eventHandler() {
+        sendSoundLoaded(obj.name);
+        newSound.removeEventListener("canplaythrough", eventHandler);
+      }
+      newSound.addEventListener("canplaythrough", eventHandler);
+      newSound.setAttribute("src", obj.src);
+      newSound.volume = obj.volume;
+      newSound.playbackRate = obj.playbackRate;
+      if (obj.loop) {
+        newSound.setAttribute("loop", "true");
+      }
+      sounds[obj.name] = newSound;
+    }
+
+  } else if (obj.code == INPUT_CODE.PLAY_SOUND) {
+    if (obj.startTime != -1) {
+      sounds[obj.name].currentTime = obj.startTime;
+    }
+    sounds[obj.name].play();
+
+  } else if (obj.code == INPUT_CODE.PAUSE_SOUND) {
+    sounds[obj.name].pause();
+
+  }
+}
+
+function sendSoundLoaded(name) {
+  if (socket != null && socket.readyState == 1) {
+    soundLoaded = {
+      "code": OUTPUT_CODE.SOUND_LOADED,
+      "name": name
+    }
+    sendToServer(soundLoaded);
   }
 }
 

@@ -19,6 +19,11 @@ void Canvaspp::SetImageLoaded(const ImageLoaded& imageLoaded) {
   }
 }
 
+void Canvaspp::SetSoundLoaded(const SoundLoaded& soundLoaded) {
+  std::lock_guard<std::mutex> serverLock(this->soundsLoadedMutex);
+  this->soundsLoaded.insert(soundLoaded.name);
+}
+
 void Canvaspp::MessageHandler(websocketpp::connection_hdl hdl, Server::message_ptr msg) {
   try {
     std::cout << msg->get_payload() << std::endl;
@@ -35,6 +40,8 @@ void Canvaspp::MessageHandler(websocketpp::connection_hdl hdl, Server::message_p
       }
     } else if (inputCode == INPUT_CODE::CODE::IMAGE_LOADED) {
       this->SetImageLoaded(Input::GetImageLoaded(json));
+    } else if (inputCode == INPUT_CODE::CODE::SOUND_LOADED) {
+      this->SetSoundLoaded(Input::GetSoundLoaded(json));
     }
 
   } catch(const std::exception& e) {
@@ -205,4 +212,47 @@ bool Canvaspp::IsImageLoaded(std::string name) {
     throw std::invalid_argument("This image does not exist.");
   }
   return this->imagesLoaded.at(name);
+}
+
+bool Canvaspp::SetBackgroundColor(const Color& color) {
+  Json json = Output::GetSetBackgroundColor(color);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+bool Canvaspp::SetCursor(std::string keyword) {
+  Cursor cursor(keyword);
+  Json json = Output::GetSetCursor(cursor);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+bool Canvaspp::SetCursor(std::string src, int x, int y, std::string fallbackKeyword) {
+  Cursor cursor(src, x, y, fallbackKeyword);
+  Json json = Output::GetSetCursor(cursor);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+bool Canvaspp::AddSound(const Sound& sound) {
+  Json json = Output::GetAddSound(sound);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+bool Canvaspp::IsSoundLoaded(std::string name) {
+  std::lock_guard<std::mutex> serverLock(this->soundsLoadedMutex);
+  return this->soundsLoaded.count(name) == 1;
+}
+
+bool Canvaspp::PlaySound(std::string name, int startTime) {
+  Json json = Output::GetPlaySound(name, startTime);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+bool Canvaspp::PauseSound(std::string name) {
+  Json json = Output::GetPauseSound(name);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
 }

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <nlohmann/json.hpp>
+#include <Color.h>
 using Json = nlohmann::json;
 
 namespace OUTPUT_CODE {
@@ -13,7 +14,12 @@ namespace OUTPUT_CODE {
     UPDATE_MOUSE_POSITION,
     TRACK_MOUSE_CLICK,
     CTX_COMMAND,
-    LOAD_IMAGE
+    LOAD_IMAGE,
+    SET_BACKGROUND_COLOR,
+    SET_CURSOR,
+    ADD_SOUND,
+    PLAY_SOUND,
+    PAUSE_SOUND
   };
 }
 
@@ -60,6 +66,67 @@ struct LoadImage {
   }
 };
 
+struct Cursor {
+  std::string keyword;
+  std::string src;
+  int x;
+  int y;
+  Cursor() {
+    this->keyword = "auto";
+    this->src = "";
+    this->x = 0;
+    this->y = 0;
+  }
+  Cursor(std::string keyword) {
+    this->keyword = keyword;
+    this->src = "";
+    this->x = 0;
+    this->y = 0;
+  }
+  Cursor(std::string src, int x, int y, std::string keyword = "auto") {
+    this->keyword = keyword;
+    this->src = src;
+    this->x = x;
+    this->y = y;
+  }
+  std::string ToString() const {
+    if (this->src == "") {
+      return this->keyword;
+    } else {
+      return "url(\"" + this->src + "\") " + std::to_string(this->x) + " " + std::to_string(this->y) + ", " + this->keyword;
+    }
+  }
+};
+
+struct Sound {
+  std::string name;
+  std::string src;
+  int volume;
+  int playbackRate;
+  bool loop;
+  Sound() {
+    this->name = "";
+    this->src = "";
+    this->volume = 1;
+    this->playbackRate = 1;
+    this->loop = false;
+  }
+  Sound(std::string name, std::string src, int volume = 1, int playbackRate = 1) {
+    this->name = name;
+    this->src = src;
+    this->volume = volume;
+    this->playbackRate = playbackRate;
+    this->loop = false;
+  }
+  Sound(std::string name, std::string src, bool loop, int volume = 1, int playbackRate = 1) {
+    this->name = name;
+    this->src = src;
+    this->volume = volume;
+    this->playbackRate = playbackRate;
+    this->loop = loop;
+  }
+};
+
 class Output {
 public:
   static OUTPUT_CODE::CODE FindOutputCode(int code);
@@ -68,5 +135,10 @@ public:
   static Json GetTrackMouseClick(const TrackMouseClick& trackMouseClick);
   static Json GetCtxCommand(const CtxCommand& ctxCommand);
   static Json GetLoadImage(const LoadImage& loadImage);
+  static Json GetSetBackgroundColor(const Color& color);
+  static Json GetSetCursor(const Cursor& cursor);
+  static Json GetAddSound(const Sound& sound);
+  static Json GetPlaySound(const std::string& name, int startTime);
+  static Json GetPauseSound(const std::string& name);
 };
 #endif

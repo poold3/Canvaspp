@@ -16,14 +16,15 @@ int main() {
     canvaspp.Start();
     canvaspp.ShowCanvas();
     std::this_thread::sleep_for(std::chrono::seconds(5));
-    canvaspp.AddImage("BeachLogo", "references/BeachLogo.PNG");
-    while (!canvaspp.IsImageLoaded("BeachLogo")) {
+    canvaspp.AddSound(Sound("Piano", "references/soft_piano_trimmed.mp3"));
+    canvaspp.AddSound(Sound("PianoLoop", "references/soft_piano_trimmed.mp3", true));
+    while (!canvaspp.IsSoundLoaded("Piano")) {
 
     }
-    
-    ctxBuilder.drawImage("BeachLogo", 0, 0);
-    canvaspp.SendCtxCommand(ctxBuilder.ToString());
-    ctxBuilder.Clear();
+    canvaspp.PlaySound("Piano");
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+    canvaspp.PauseSound("Piano");
+    canvaspp.PlaySound("PianoLoop", 10);
     while (canvaspp.GetNumConnections() != 0) {
       
     }
