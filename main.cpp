@@ -25,7 +25,7 @@ int main() {
     Canvaspp canvaspp;
     canvaspp.Start();
     canvaspp.ShowCanvas();
-    /*
+    
     canvaspp.SetTrackMousePosition(true);
     canvaspp.SetTrackMouseClick(true);
     canvaspp.SetTrackKeyPress(true);
@@ -33,7 +33,6 @@ int main() {
     canvaspp.SetMouseDownHandler(mouseDownHandler);
     canvaspp.SetKeyUpHandler(keyUpHandler);
     canvaspp.SetKeyDownHandler(keyDownHandler);
-    */
     
     canvaspp.AddImage("main_1", "references/main_1.png");
     canvaspp.AddImage("main_2", "references/main_2.png");

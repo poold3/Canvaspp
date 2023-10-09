@@ -120,7 +120,17 @@ Canvaspp::~Canvaspp() {
 
 void Canvaspp::ShowCanvas() {
   int currentConnections = this->GetNumConnections();
-  std::string command = "explorer.exe \"$(wslpath -w ui/index.html)\"";
+  #ifdef WSL
+    std::string command = "explorer.exe \"$(wslpath -w ui/index.html)\"";
+  #elif defined(WINDOWS)
+    std::string command = "explorer.exe \"ui/index.html\"";
+  #elif defined(LINUX)
+    std::string command = "xdg-open ui/index.html";
+  #elif defined(MACOS)
+    std::string command = "open ui/index.html";
+  #else
+    throw std::runtime_error("No OS specified.")
+  #endif
   std::system(command.c_str());
 
   //Await Canvas Connection
