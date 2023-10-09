@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <nlohmann/json.hpp>
+
 using Json = nlohmann::json;
 
 namespace INPUT_CODE {
@@ -12,9 +13,12 @@ namespace INPUT_CODE {
     NONE,
     DIMENSIONS,
     MOUSE_POSITION,
-    MOUSE_CLICK,
+    MOUSE_DOWN,
+    MOUSE_UP,
     IMAGE_LOADED,
-    SOUND_LOADED
+    SOUND_LOADED,
+    KEY_DOWN,
+    KEY_UP
   };
 }
 
@@ -57,35 +61,31 @@ struct MouseClick {
   }
 };
 
-struct ImageLoaded {
-  std::string name;
-  ImageLoaded() {
-    this->name = "";
-  }
-  ImageLoaded(std::string name) {
-    this->name = name;
-  }
-};
-
-struct SoundLoaded {
-  std::string name;
-  SoundLoaded() {
-    this->name = "";
-  }
-  SoundLoaded(std::string name) {
-    this->name = name;
-  }
-};
-
 class Input {
 public:
+  /* Returns the INPUT_CODE that corresponds with the provided int. */
   static INPUT_CODE::CODE FindInputCode(int code);
+
+  /* Extracts the INPUT_CODE from a Json object. The INPUT_CODE field in the Json must be called "code". */
   static INPUT_CODE::CODE GetInputCode(const Json& json);
+
+  /* Returns a Dimensions object with the correct DIMENSIONS value. */
   static Dimensions GetDimensions(const Json& json);
+
+  /* Returns a MousePosition object with the correct MOUSE_POSITION value. */
   static MousePosition GetMousePosition(const Json& json);
+
+  /* Returns a MouseClick object with the correct MOUSE_DOWN or MOUSE_UP value. */
   static MouseClick GetMouseClick(const Json& json);
-  static ImageLoaded GetImageLoaded(const Json& json);
-  static SoundLoaded GetSoundLoaded(const Json& json);
+
+  /* Returns a std::string with the correct IMAGE_LOADED value. */
+  static std::string GetImageLoaded(const Json& json);
+
+  /* Returns a std::string with the correct SOUND_LOADED value. */
+  static std::string GetSoundLoaded(const Json& json);
+
+  /* Returns a std::string with the correct KEY_DOWN or KEY_UP value. */
+  static std::string GetKeyPress(const Json& json);
 };
 
 #endif

@@ -17,6 +17,7 @@ std::string CtxCommandBuilder::ToString() const {
 }
 
 // Instance Properties
+
 CtxCommandBuilder& CtxCommandBuilder::direction(std::string dir) {
   if (dir == "ltr" || dir == "rtl" || dir == "inherit") {
     this->buffer.append("ctx.direction = '" + dir + "';");
@@ -171,6 +172,7 @@ CtxCommandBuilder& CtxCommandBuilder::wordSpacing(int pixels) {
 }
 
 // Instance Methods
+
 CtxCommandBuilder& CtxCommandBuilder::arc(int x, int y, int radius, double startAngle, double endAngle, bool counterclockwise) {
   double startAngleRadians = (startAngle * PI) / 180.0;
   double endAngleRadians = (endAngle * PI) / 180.0;

@@ -2,14 +2,17 @@ const OUTPUT_CODE = {
   NONE: 0,
   DIMENSIONS: 1,
   MOUSE_POSITION: 2,
-  MOUSE_CLICK: 3,
-  IMAGE_LOADED: 4,
-  SOUND_LOADED: 5
+  MOUSE_DOWN: 3,
+  MOUSE_UP: 4,
+  IMAGE_LOADED: 5,
+  SOUND_LOADED: 6,
+  KEY_DOWN: 7,
+  KEY_UP: 8
 }
 
 const INPUT_CODE = {
   NONE: 0,
-  UPDATE_MOUSE_POSITION: 1,
+  TRACK_MOUSE_POSITION: 1,
   TRACK_MOUSE_CLICK: 2,
   CTX_COMMAND: 3,
   LOAD_IMAGE: 4,
@@ -17,30 +20,33 @@ const INPUT_CODE = {
   SET_CURSOR: 6,
   ADD_SOUND: 7,
   PLAY_SOUND: 8,
-  PAUSE_SOUND: 9
+  PAUSE_SOUND: 9,
+  TRACK_KEY_PRESS: 10
 }
 
 const images = {};
 const sounds = {};
+const keysDown = {};
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 let socket = null;
 
+// Send a json string to the server.
 function sendToServer(object) {
   if (socket != null && socket.readyState == 1) {
     socket.send(JSON.stringify(object));
   }
 }
 
+// Handle messages/commands from the server.
 function handleWebSocketMessage(event) {
-  console.log('Message from server:', event.data);
   const obj = JSON.parse(event.data);
   if (obj.code == INPUT_CODE.CTX_COMMAND) {
     eval?.(`"use strict";${obj.command}`);
 
-  } else if (obj.code == INPUT_CODE.UPDATE_MOUSE_POSITION) {
-    if (obj.update == true) {
+  } else if (obj.code == INPUT_CODE.TRACK_MOUSE_POSITION) {
+    if (obj.track == true) {
       canvas.addEventListener("mousemove", trackMousePosition);
     } else {
       canvas.removeEventListener("mousemove", trackMousePosition);
@@ -48,9 +54,11 @@ function handleWebSocketMessage(event) {
 
   } else if (obj.code == INPUT_CODE.TRACK_MOUSE_CLICK) {
     if (obj.track == true) {
-      canvas.addEventListener("click", trackMouseClick);
+      canvas.addEventListener("mousedown", trackMouseDown);
+      canvas.addEventListener("mouseup", trackMouseUp);
     } else {
-      canvas.removeEventListener("click", trackMouseClick);
+      canvas.removeEventListener("mousedown", trackMouseDown);
+      canvas.removeEventListener("mouseup", trackMouseUp);
     }
 
   } else if (obj.code == INPUT_CODE.LOAD_IMAGE) {
@@ -93,9 +101,42 @@ function handleWebSocketMessage(event) {
   } else if (obj.code == INPUT_CODE.PAUSE_SOUND) {
     sounds[obj.name].pause();
 
+  } else if (obj.code == INPUT_CODE.TRACK_KEY_PRESS) {
+    if (obj.track == true) {
+      document.addEventListener("keydown", trackKeyDown);
+      document.addEventListener("keyup", trackKeyUp);
+    } else {
+      document.removeEventListener("keydown", trackKeyDown);
+      document.removeEventListener("keyup", trackKeyUp);
+    }
   }
 }
 
+// Send a key press to the server if the key is not already down.
+function trackKeyDown(event) {
+  if (socket != null && socket.readyState == 1 && (!Object.hasOwn(keysDown, event.code) || !keysDown[event.code])) {
+    keysDown[event.code] = true;
+    keyPress = {
+      "code": OUTPUT_CODE.KEY_DOWN,
+      "pressCode": event.code,
+    }
+    sendToServer(keyPress);
+  }
+}
+
+// Send a key press to the server if a key is released.
+function trackKeyUp(event) {
+  if (socket != null && socket.readyState == 1) {
+    keysDown[event.code] = false;
+    keyPress = {
+      "code": OUTPUT_CODE.KEY_UP,
+      "pressCode": event.code,
+    }
+    sendToServer(keyPress);
+  }
+}
+
+// Send confirmation to the server that a sound has loaded.
 function sendSoundLoaded(name) {
   if (socket != null && socket.readyState == 1) {
     soundLoaded = {
@@ -106,6 +147,7 @@ function sendSoundLoaded(name) {
   }
 }
 
+// Send confirmation to the server that an image has loaded.
 function sendImageLoaded(name) {
   if (socket != null && socket.readyState == 1) {
     imageLoaded = {
@@ -116,10 +158,11 @@ function sendImageLoaded(name) {
   }
 }
 
-function trackMouseClick(event) {
+// Send a mouse click to the server.
+function trackMouseDown(event) {
   if (socket != null && socket.readyState == 1) {
     mouseClick = {
-      "code": OUTPUT_CODE.MOUSE_CLICK,
+      "code": OUTPUT_CODE.MOUSE_DOWN,
       "x": event.clientX,
       "y": event.clientY
     }
@@ -127,6 +170,19 @@ function trackMouseClick(event) {
   }
 }
 
+// Send a mouse click to the server when the mouse click is released.
+function trackMouseUp(event) {
+  if (socket != null && socket.readyState == 1) {
+    mouseClick = {
+      "code": OUTPUT_CODE.MOUSE_UP,
+      "x": event.clientX,
+      "y": event.clientY
+    }
+    sendToServer(mouseClick);
+  }
+}
+
+// Send the current mouse position to the server.
 function trackMousePosition(event) {
   if (socket != null && socket.readyState == 1) {
     mousePosition = {
@@ -138,9 +194,10 @@ function trackMousePosition(event) {
   }
 }
 
+// Resize the canvas and send new size to the server.
 function adjustCanvasSize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth + 1;
+  canvas.height = window.innerHeight + 1;
   if (socket != null && socket.readyState == 1) {
     dimensions = {
       "code": OUTPUT_CODE.DIMENSIONS,
@@ -151,14 +208,17 @@ function adjustCanvasSize() {
   }
 }
 
+// Add window resize listener to resize canvas.
 window.addEventListener("resize", adjustCanvasSize);
 
+// Close the socket connection before exiting.
 window.addEventListener("beforeunload", (event) => {
   if (socket != null && socket.readyState == 1) {
     socket.close();
   }
 });
 
+// Initiate the websocket connection. Set the open, close, and error handlers.
 function connectWebSocket() {
   socket = new WebSocket("ws://localhost:65000");
 
@@ -170,6 +230,7 @@ function connectWebSocket() {
     adjustCanvasSize();
   });
 
+  // Window will close if socket connection closes.
   socket.addEventListener('close', (event) => {
     console.log('WebSocket connection closed:', event);
     socket.removeEventListener('message', handleWebSocketMessage);

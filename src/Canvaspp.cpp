@@ -12,16 +12,14 @@ void Canvaspp::SetMousePosition(const MousePosition& mousePosition) {
   this->mousePosition = mousePosition;
 }
 
-void Canvaspp::SetImageLoaded(const ImageLoaded& imageLoaded) {
+void Canvaspp::SetImageLoaded(const std::string& imageLoaded) {
   std::lock_guard<std::mutex> serverLock(this->imagesLoadedMutex);
-  if (this->imagesLoaded.count(imageLoaded.name) == 1) {
-    this->imagesLoaded.at(imageLoaded.name) = true;
-  }
+  this->imagesLoaded.insert(imageLoaded);
 }
 
-void Canvaspp::SetSoundLoaded(const SoundLoaded& soundLoaded) {
+void Canvaspp::SetSoundLoaded(const std::string& soundLoaded) {
   std::lock_guard<std::mutex> serverLock(this->soundsLoadedMutex);
-  this->soundsLoaded.insert(soundLoaded.name);
+  this->soundsLoaded.insert(soundLoaded);
 }
 
 void Canvaspp::MessageHandler(websocketpp::connection_hdl hdl, Server::message_ptr msg) {
@@ -34,9 +32,21 @@ void Canvaspp::MessageHandler(websocketpp::connection_hdl hdl, Server::message_p
       this->SetDimensions(Input::GetDimensions(json));
     } else if (inputCode == INPUT_CODE::CODE::MOUSE_POSITION) {
       this->SetMousePosition(Input::GetMousePosition(json));
-    } else if (inputCode == INPUT_CODE::CODE::MOUSE_CLICK) {
-      if (this->mouseClickLambda != nullptr) {
-        this->mouseClickLambda(Input::GetMouseClick(json));
+    } else if (inputCode == INPUT_CODE::CODE::MOUSE_DOWN) {
+      if (this->mouseDownLambda != nullptr) {
+        this->mouseDownLambda(Input::GetMouseClick(json));
+      }
+    } else if (inputCode == INPUT_CODE::CODE::MOUSE_UP) {
+      if (this->mouseUpLambda != nullptr) {
+        this->mouseUpLambda(Input::GetMouseClick(json));
+      }
+    } else if (inputCode == INPUT_CODE::CODE::KEY_DOWN) {
+      if (this->keyDownLambda != nullptr) {
+        this->keyDownLambda(Input::GetKeyPress(json));
+      }
+    } else if (inputCode == INPUT_CODE::CODE::KEY_UP) {
+      if (this->keyUpLambda != nullptr) {
+        this->keyUpLambda(Input::GetKeyPress(json));
       }
     } else if (inputCode == INPUT_CODE::CODE::IMAGE_LOADED) {
       this->SetImageLoaded(Input::GetImageLoaded(json));
@@ -49,75 +59,12 @@ void Canvaspp::MessageHandler(websocketpp::connection_hdl hdl, Server::message_p
   }
 }
 
-/*Requires std::lock_guard<std::mutex> serverLock(this->serverMutex); */
 void Canvaspp::CloseConnections() {
   std::lock_guard<std::mutex> connectionLock(this->connectionsMutex);
   for (websocketpp::connection_hdl hdl: this->connections) {
     auto connection = this->server.get_con_from_hdl(hdl);
     connection->close(1000, "Server closing!");
   }
-}
-
-Canvaspp::Canvaspp() {
-  this->server.set_error_channels(websocketpp::log::elevel::all);
-  this->server.set_access_channels(websocketpp::log::alevel::all);
-  this->server.set_message_handler([this](websocketpp::connection_hdl hdl, Server::message_ptr msg) {
-    this->MessageHandler(hdl, msg);
-  });
-  this->server.set_open_handler([this](websocketpp::connection_hdl hdl) {
-    std::lock_guard<std::mutex> connectionLock(this->connectionsMutex);
-    this->connections.insert(hdl);
-  });
-  this->server.set_close_handler([this](websocketpp::connection_hdl hdl) {
-    std::lock_guard<std::mutex> connectionLock(this->connectionsMutex);
-    this->connections.erase(hdl);
-  });
-  
-  this->server.init_asio();
-  this->server.set_reuse_addr(true);
-}
-
-Canvaspp::~Canvaspp() {
-  if (this->GetNumConnections() > 0) {
-    this->Stop();
-  }
-}
-
-void Canvaspp::ShowCanvas() {
-  int currentConnections = this->GetNumConnections();
-  std::string command = "explorer.exe \"$(wslpath -w ui/index.html)\"";
-  std::system(command.c_str());
-
-  //Await Canvas Connection
-  auto start = this->GetCurrentTime();
-  while (this->GetNumConnections() == currentConnections) {
-    if (std::chrono::duration_cast<std::chrono::milliseconds>(this->GetCurrentTime() - start) >= std::chrono::seconds(10)) {
-      throw std::runtime_error("Failed to show and connect canvas.");
-    }
-  }
-}
-
-void Canvaspp::Start() {
-  std::lock_guard<std::mutex> serverLock(this->serverMutex);
-  this->server.reset();
-  this->server.listen(65000);
-  this->server.start_accept();
-  this->thread = std::thread([](Server& server) {
-    server.run();
-  }, std::ref(this->server));
-}
-
-void Canvaspp::Stop() {
-  std::lock_guard<std::mutex> serverLock(this->serverMutex);
-  this->server.stop_listening();
-  this->server.stop_perpetual();
-  this->CloseConnections();
-  this->thread.join();
-}
-
-int Canvaspp::GetNumConnections() {
-  std::lock_guard<std::mutex> connectionMutex(this->connectionsMutex);
-  return this->connections.size();
 }
 
 bool Canvaspp::SendJSON(const std::string jsonStr) {
@@ -142,6 +89,78 @@ bool Canvaspp::SendJSON(const std::string jsonStr) {
   }
 }
 
+Canvaspp::Canvaspp() {
+  this->server.set_error_channels(websocketpp::log::elevel::all);
+  this->server.set_access_channels(websocketpp::log::alevel::all);
+  this->server.set_message_handler([this](websocketpp::connection_hdl hdl, Server::message_ptr msg) {
+    this->MessageHandler(hdl, msg);
+  });
+  this->server.set_open_handler([this](websocketpp::connection_hdl hdl) {
+    std::lock_guard<std::mutex> connectionLock(this->connectionsMutex);
+    this->connections.insert(hdl);
+    this->hasConnections = true;
+  });
+  this->server.set_close_handler([this](websocketpp::connection_hdl hdl) {
+    std::lock_guard<std::mutex> connectionLock(this->connectionsMutex);
+    this->connections.erase(hdl);
+    if (this->connections.size() == 0) {
+      this->hasConnections = false;
+    }
+  });
+  
+  this->server.init_asio();
+  this->server.set_reuse_addr(true);
+}
+
+Canvaspp::~Canvaspp() {
+  if (!this->isShuttingDown) {
+    this->Stop();
+  }
+}
+
+void Canvaspp::ShowCanvas() {
+  int currentConnections = this->GetNumConnections();
+  std::string command = "explorer.exe \"$(wslpath -w ui/index.html)\"";
+  std::system(command.c_str());
+
+  //Await Canvas Connection
+  auto start = this->GetCurrentTime();
+  while (this->GetNumConnections() == currentConnections) {
+    if (std::chrono::duration_cast<std::chrono::milliseconds>(this->GetCurrentTime() - start) >= std::chrono::seconds(10)) {
+      throw std::runtime_error("Failed to show and connect canvas.");
+    }
+  }
+}
+
+void Canvaspp::Start() {
+  std::lock_guard<std::mutex> serverLock(this->serverMutex);
+  this->server.reset();
+  this->server.listen(65000);
+  this->server.start_accept();
+  this->serverThread = std::thread([](Server& server) {
+    server.run();
+  }, std::ref(this->server));
+}
+
+void Canvaspp::Stop() {
+  this->isShuttingDown = true;
+  std::lock_guard<std::mutex> serverLock(this->serverMutex);
+  this->server.stop_listening();
+  this->server.stop_perpetual();
+  this->CloseConnections();
+  this->serverThread.join();
+}
+
+int Canvaspp::GetNumConnections() {
+  std::lock_guard<std::mutex> connectionMutex(this->connectionsMutex);
+  return this->connections.size();
+}
+
+bool Canvaspp::HasConnections() {
+  std::lock_guard<std::mutex> connectionMutex(this->connectionsMutex);
+  return this->hasConnections;
+}
+
 std::string Canvaspp::JsonToStr(const Json json) {
   return json.dump();
 }
@@ -162,44 +181,41 @@ bool Canvaspp::IsMousePositionCurrent() const {
   return (this->mousePosition.x != -1) && (this->mousePosition.y != -1);
 }
 
-bool Canvaspp::SetUpdateMousePosition(bool update) {
-  if (!update) {
+bool Canvaspp::SetTrackMousePosition(bool track) {
+  if (!track) {
     this->mousePosition.x = -1;
     this->mousePosition.y = -1;
   }
-  UpdateMousePosition updateMousePosition(update);
-  Json json = Output::GetUpdateMousePosition(updateMousePosition);
+  Json json = Output::GetTrackMousePosition(track);
   std::string jsonStr = Canvaspp::JsonToStr(json);
   return this->SendJSON(jsonStr);
 }
 
 bool Canvaspp::SetTrackMouseClick(bool track) {
   if (!track) {
-    this->mouseClickLambda = nullptr;
+    this->mouseDownLambda = nullptr;
+    this->mouseUpLambda = nullptr;
   }
-  TrackMouseClick trackMouseClick(track);
-  Json json = Output::GetTrackMouseClick(trackMouseClick);
+  Json json = Output::GetTrackMouseClick(track);
   std::string jsonStr = Canvaspp::JsonToStr(json);
   return this->SendJSON(jsonStr);
 }
 
-void Canvaspp::SetMouseClickHandler(MouseClickLambda mouseClickLambda) {
-  this->mouseClickLambda = mouseClickLambda;
+void Canvaspp::SetMouseDownHandler(MouseClickLambda mouseDownLambda) {
+  this->mouseDownLambda = mouseDownLambda;
+}
+
+void Canvaspp::SetMouseUpHandler(MouseClickLambda mouseUpLambda) {
+  this->mouseUpLambda = mouseUpLambda;
 }
 
 bool Canvaspp::SendCtxCommand(std::string command) {
-  CtxCommand ctxCommand(command);
-  Json json = Output::GetCtxCommand(ctxCommand);
+  Json json = Output::GetCtxCommand(command);
   std::string jsonStr = Canvaspp::JsonToStr(json);
   return this->SendJSON(jsonStr);
 }
 
 bool Canvaspp::AddImage(std::string name, std::string src) {
-  std::lock_guard<std::mutex> serverLock(this->imagesLoadedMutex);
-  if (this->imagesLoaded.count(name) == 1) {
-    throw std::invalid_argument("This image already exists.");
-  }
-  this->imagesLoaded.insert(std::pair<std::string, bool>(name, false));
   LoadImage loadImage(name, src);
   Json json = Output::GetLoadImage(loadImage);
   std::string jsonStr = Canvaspp::JsonToStr(json);
@@ -208,10 +224,7 @@ bool Canvaspp::AddImage(std::string name, std::string src) {
 
 bool Canvaspp::IsImageLoaded(std::string name) {
   std::lock_guard<std::mutex> serverLock(this->imagesLoadedMutex);
-  if (this->imagesLoaded.count(name) != 1) {
-    throw std::invalid_argument("This image does not exist.");
-  }
-  return this->imagesLoaded.at(name);
+  return this->imagesLoaded.count(name) == 1;
 }
 
 bool Canvaspp::SetBackgroundColor(const Color& color) {
@@ -246,13 +259,37 @@ bool Canvaspp::IsSoundLoaded(std::string name) {
 }
 
 bool Canvaspp::PlaySound(std::string name, int startTime) {
+  if (!this->IsSoundLoaded(name)) {
+    throw std::invalid_argument("Sound: " + name + " is not yet loaded.");
+  }
   Json json = Output::GetPlaySound(name, startTime);
   std::string jsonStr = Canvaspp::JsonToStr(json);
   return this->SendJSON(jsonStr);
 }
 
 bool Canvaspp::PauseSound(std::string name) {
+  if (!this->IsSoundLoaded(name)) {
+    throw std::invalid_argument("Sound: " + name + " is not yet loaded.");
+  }
   Json json = Output::GetPauseSound(name);
   std::string jsonStr = Canvaspp::JsonToStr(json);
   return this->SendJSON(jsonStr);
+}
+
+bool Canvaspp::SetTrackKeyPress(bool track) {
+  if (!track) {
+    this->keyDownLambda = nullptr;
+    this->keyUpLambda = nullptr;
+  }
+  Json json = Output::GetTrackKeyPress(track);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+void Canvaspp::SetKeyDownHandler(KeyPressLambda keyDownLambda) {
+  this->keyDownLambda = keyDownLambda;
+}
+
+void Canvaspp::SetKeyUpHandler(KeyPressLambda keyUpLambda) {
+  this->keyUpLambda = keyUpLambda;
 }

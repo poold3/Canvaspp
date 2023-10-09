@@ -1,7 +1,7 @@
 #include "Input.h"
 
 INPUT_CODE::CODE Input::FindInputCode(int code) {
-  for (int i = static_cast<int>(INPUT_CODE::CODE::NONE); i <= static_cast<int>(INPUT_CODE::CODE::SOUND_LOADED); ++i) {
+  for (int i = static_cast<int>(INPUT_CODE::CODE::NONE); i <= static_cast<int>(INPUT_CODE::CODE::KEY_UP); ++i) {
     if (i == code) {
       return static_cast<INPUT_CODE::CODE>(i);
     }
@@ -58,22 +58,26 @@ MouseClick Input::GetMouseClick(const Json& json) {
   return MouseClick(x, y);
 }
 
-ImageLoaded Input::GetImageLoaded(const Json& json) {
+std::string Input::GetImageLoaded(const Json& json) {
   if (!json.at("name").is_string()) {
-    throw std::invalid_argument("The \"x\" field is not a number.");
+    throw std::invalid_argument("The \"name\" field is not a string.");
   }
 
-  std::string name = json.at("name");
-
-  return ImageLoaded(name);
+  return json.at("name");
 }
 
-SoundLoaded Input::GetSoundLoaded(const Json& json) {
+std::string Input::GetSoundLoaded(const Json& json) {
   if (!json.at("name").is_string()) {
-    throw std::invalid_argument("The \"x\" field is not a number.");
+    throw std::invalid_argument("The \"name\" field is not a string.");
   }
 
-  std::string name = json.at("name");
+  return json.at("name");
+}
 
-  return SoundLoaded(name);
+std::string Input::GetKeyPress(const Json& json) {
+  if (!json.at("pressCode").is_string()) {
+    throw std::invalid_argument("The \"pressCode\" field is not a string.");
+  }
+
+  return json.at("pressCode");
 }

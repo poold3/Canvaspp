@@ -7,70 +7,194 @@
 #include <mutex>
 #include <set>
 #include <stdexcept>
-#include <map>
-#include <set>
 #include <chrono>
 
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
 #include <nlohmann/json.hpp>
 
-#include <Input.h>
-#include <Output.h>
+#include "Input.h"
+#include "Output.h"
 
 using Json = nlohmann::json;
 
 typedef websocketpp::server<websocketpp::config::asio> Server;
 typedef void(*MouseClickLambda)(MouseClick mouseClick);
+typedef void(*KeyPressLambda)(std::string keyPress);
 
 class Canvaspp {
 private:
   Server server;
+  std::thread serverThread;
+
+  // Stored connections
   std::set<websocketpp::connection_hdl, std::owner_less<websocketpp::connection_hdl>> connections;
-  std::thread thread;
+  
+  // Mutexes
   std::mutex serverMutex;
   std::mutex connectionsMutex;
   std::mutex imagesLoadedMutex;
   std::mutex soundsLoadedMutex;
+
+  // Canvas Properties
   Dimensions dimensions;
   MousePosition mousePosition;
-  MouseClickLambda mouseClickLambda = nullptr;
-  std::map<std::string, bool> imagesLoaded;
+
+  // Mouse Click and Key Press Handlers
+  MouseClickLambda mouseDownLambda = nullptr;
+  MouseClickLambda mouseUpLambda = nullptr;
+  KeyPressLambda keyDownLambda = nullptr;
+  KeyPressLambda keyUpLambda = nullptr;
+
+  // Image and Sound Loaded Storage
+  std::set<std::string> imagesLoaded;
   std::set<std::string> soundsLoaded;
 
+  // Useful bools
+  bool hasConnections = false;
+  bool isShuttingDown = false;
+
+  /* Returns current time using std::chrono::high_resolution_clock. Useful for timeouts on loops. */
   std::chrono::_V2::system_clock::time_point GetCurrentTime() const;
+
+  /* Called by MessageHandler() when the canvas dimensions are updated. */
   void SetDimensions(const Dimensions& dimensions);
+
+  /* Called by MessageHandler() when the canvas mouse position is updated. */
   void SetMousePosition(const MousePosition& mousePosition);
-  void SetImageLoaded(const ImageLoaded& imageLoaded);
-  void SetSoundLoaded(const SoundLoaded& soundLoaded);
+
+  /* Called by MessageHandler() when an image has successfully loaded in the client.
+  The image can now be drawn. */
+  void SetImageLoaded(const std::string& imageLoaded);
+
+  /* Called by MessageHandler() when a sound has successfully loaded in the client.
+  The sound can now be played. */
+  void SetSoundLoaded(const std::string& soundLoaded);
+
+  /* Handles all incoming messages from the client. Uses the INPUT_CODES to distinguish message type. */
   void MessageHandler(websocketpp::connection_hdl hdl, Server::message_ptr msg);
+
+  /* Closes any open connections with the server.
+  Requires std::lock_guard<std::mutex> serverLock(this->serverMutex); to be run before calling. */
   void CloseConnections();
+
+  /* Sends a json string to all open client connections.
+  All json strings should have a "code" field wih an OUTPUT_CODE and the corresponding information. */
   bool SendJSON(const std::string jsonStr);
 public:
+  /* Sets server channels and server handlers. Performs basic server initiation. */
   Canvaspp();
+
+  /* Calls this->Stop() if !this->isShuttingDown. */
   ~Canvaspp();
+
+  /* Runs the OS command to open the client's default browser to ui/index.html.
+  Waits a maximum of 10 seconds for a connection to be opened or throws a runtime error. */
   void ShowCanvas();
+
+  /* Server starts listening on port 65000 and begins accepting connections.
+  this->serverThread is used to run the server. */
   void Start();
+
+  /* Stops listening for new connections. Tells server to shutdown once all connections are closed.
+  Closes all connections with this->CloseConnections(). Joins this->serverThread. */
   void Stop();
+
+  /* Returns the current number of connections in this->connections. */
   int GetNumConnections();
+
+  /* Returns this->hasConnections. this->hasConnections is updated on the open and close connection handlers.
+  Returns true if there is at least 1 open connection. */
+  bool HasConnections();
+
+  /* Helper function that converts a Json object to a json string. */
   static std::string JsonToStr(const Json json);
+
+  /* Helper function that converts a json string object to a Json object. */
   static Json StrToJson(const std::string str);
+
+  /* If the client has been updated to track the mouse position using SetTrackMousePosition(true),
+  returns the current mouse position of the user. */
   MousePosition GetMousePosition() const;
+
+  /* Returns the current dimensions of the client canvas. */
   Dimensions GetDimensions() const;
+
+  /* Returns true if the current mouse position accurate. AKA if SetTrackMousePosition(true) has been used. */
   bool IsMousePositionCurrent() const;
-  bool SetUpdateMousePosition(bool update);
+
+  /* Tells the client whether or not to transmit the current mouse position of the user to the server.
+  Returns true if the command was successfully sent to the client. */
+  bool SetTrackMousePosition(bool track);
+
+  /* Tells the client whether or not to transmit the mouse position when a mouse click occurs.
+  The server will then call the mouse click handlers.
+  Returns true if the command was successfully sent to the client. */
   bool SetTrackMouseClick(bool track);
-  void SetMouseClickHandler(MouseClickLambda mouseClickLambda);
+
+  /* Sets the handler to be called when the user clicks down with their mouse. In order for this handler to be used,
+  SetTrackMouseClick(true) must have been called. */
+  void SetMouseDownHandler(MouseClickLambda mouseDownLambda);
+
+  /* Sets the handler to be called when the user releases a click with their mouse. In order for this handler to be used,
+  SetTrackMouseClick(true) must have been called. */
+  void SetMouseUpHandler(MouseClickLambda mouseUpLambda);
+
+  /* Sends a series of ctx commands to the client to be executed.
+  Returns true if the command was successfully sent to the client. */
   bool SendCtxCommand(std::string command);
+
+  /* Sends a new image for the client to begin loading for use.
+  Returns true if the command was successfully sent to the client. */
   bool AddImage(std::string name, std::string src);
+
+  /* Returns true if the client has told the server the specified image has loaded and is thus ready for use. */
   bool IsImageLoaded(std::string name);
+
+  /* Sends a color to be set as the background of the client canvas.
+  Returns true if the command was successfully sent to the client. */
   bool SetBackgroundColor(const Color& color);
+
+  /* Sends a keyword to determine the cursor type of the client.
+  For valid keywords, see https://developer.mozilla.org/en-US/docs/Web/CSS/cursor.
+  Returns true if the command was successfully sent to the client. */
   bool SetCursor(std::string keyword);
+
+  /* Sends a reference image url to set the cursor of the client.
+  x and y refer to the hotspot of the cursor image, or the exact cursor position.
+  Returns true if the command was successfully sent to the client. */
   bool SetCursor(std::string src, int x, int y, std::string fallbackKeyword = "auto");
+
+  /* Sends a new sound for the client to begin loading for use.
+  Returns true if the command was successfully sent to the client. */
   bool AddSound(const Sound& sound);
+
+  /* Returns true if the client has told the server the specified sound has loaded and is thus ready for use. */
   bool IsSoundLoaded(std::string name);
+
+  /* Tells the client to play the specified sound.
+  Option to set the start time of the sound to a certain amount of seconds after the start.
+  By default, the sound will continue playing from where it was paused.
+  If the sound already finished playing, the sound will restart from the beginning.
+  Returns true if the command was successfully sent to the client. */
   bool PlaySound(std::string name, int startTime = -1);
+
+  /* Tells the client to pause the specified sound.
+  Returns true if the command was successfully sent to the client. */
   bool PauseSound(std::string name);
+
+  /* Tells the client whether or not to transmit the key code when a key press occurs.
+  The server will then call the key press handlers.
+  Returns true if the command was successfully sent to the client. */
+  bool SetTrackKeyPress(bool track);
+
+  /* Sets the handler to be called when the user presses a key down. In order for this handler to be used,
+  SetTrackKeyPress(true) must have been called. */
+  void SetKeyDownHandler(KeyPressLambda keyDownLambda);
+
+  /* Sets the handler to be called when the user releases a pressed key. In order for this handler to be used,
+  SetTrackKeyPress(true) must have been called. */
+  void SetKeyUpHandler(KeyPressLambda keyUpLambda);
 };
 
 #endif

@@ -1,7 +1,7 @@
 #include "Output.h"
 
 OUTPUT_CODE::CODE Output::FindOutputCode(int code) {
-  for (int i = static_cast<int>(OUTPUT_CODE::CODE::NONE); i <= static_cast<int>(OUTPUT_CODE::CODE::PAUSE_SOUND); ++i) {
+  for (int i = static_cast<int>(OUTPUT_CODE::CODE::NONE); i <= static_cast<int>(OUTPUT_CODE::CODE::TRACK_KEY_PRESS); ++i) {
     if (i == code) {
       return static_cast<OUTPUT_CODE::CODE>(i);
     }
@@ -17,24 +17,24 @@ OUTPUT_CODE::CODE Output::GetOutputCode(const Json& json) {
   return Output::FindOutputCode(code);
 }
 
-Json Output::GetUpdateMousePosition(const UpdateMousePosition& updateMousePosition) {
+Json Output::GetTrackMousePosition(const bool& trackMousePosition) {
   Json json;
-  json["code"] = OUTPUT_CODE::CODE::UPDATE_MOUSE_POSITION;
-  json["update"] = updateMousePosition.update;
+  json["code"] = OUTPUT_CODE::CODE::TRACK_MOUSE_POSITION;
+  json["track"] = trackMousePosition;
   return json;
 }
 
-Json Output::GetTrackMouseClick(const TrackMouseClick& trackMouseClick) {
+Json Output::GetTrackMouseClick(const bool& trackMouseClick) {
   Json json;
   json["code"] = OUTPUT_CODE::CODE::TRACK_MOUSE_CLICK;
-  json["track"] = trackMouseClick.track;
+  json["track"] = trackMouseClick;
   return json;
 }
 
-Json Output::GetCtxCommand(const CtxCommand& ctxCommand) {
+Json Output::GetCtxCommand(const std::string& ctxCommand) {
   Json json;
   json["code"] = OUTPUT_CODE::CODE::CTX_COMMAND;
-  json["command"] = ctxCommand.command;
+  json["command"] = ctxCommand;
   return json;
 }
 
@@ -83,5 +83,12 @@ Json Output::GetPauseSound(const std::string& name) {
   Json json;
   json["code"] = OUTPUT_CODE::CODE::PAUSE_SOUND;
   json["name"] = name;
+  return json;
+}
+
+Json Output::GetTrackKeyPress(const bool& keyPress) {
+  Json json;
+  json["code"] = OUTPUT_CODE::CODE::TRACK_KEY_PRESS;
+  json["track"] = keyPress;
   return json;
 }
