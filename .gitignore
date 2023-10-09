@@ -1,4 +1,4 @@
-libs/boost
 libs/json
 libs/websocketpp
+libs/asio
 main
