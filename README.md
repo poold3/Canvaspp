@@ -14,7 +14,7 @@ https://think-async.com/Asio/AsioStandalone.html
 
 WebSocket++ normally requires a dependency on the Boost Asio library. Standalone Asio is a smaller library that will offer the same features needed. However, in order to let the compiler know you wish to use Standalone Asio, you must define ASIO_STANDALONE in your compiler command.
 ## Makefile
-If you would like to use the provided Makefile to compile Canvas++, simply follow the steps on the Makefile and run make. This should produce a working shared file library.
+If you would like to use the provided Makefile to compile Canvas++, simply follow the steps on the Makefile and run make. This should produce a working shared library file in the lib directory.
 ## Basic Example
 A basic example that sets mouse click and key press handlers. This example also shows how to add images and sounds. Finally, the example shows how to draw images onto the canvas using the CtxCommandBuilder and how to play sounds. Notice how the while loop will continue until the user closes the browser, and thus closes the connection.
 ```
