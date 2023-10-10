@@ -11,7 +11,10 @@ https://json.nlohmann.me/
 https://github.com/nlohmann/json
 ### Standalone Asio C++ Library v1.28.0
 https://think-async.com/Asio/AsioStandalone.html
-WebSocket++ normally requires a dependency on the Boost/Asio library. Standalone Asio is a smaller library that will offer the same features needed. However, in order to let the compiler know you wish to use Standalone Asio, you must define ASIO_STANDALONE on your compiler command.
+
+WebSocket++ normally requires a dependency on the Boost Asio library. Standalone Asio is a smaller library that will offer the same features needed. However, in order to let the compiler know you wish to use Standalone Asio, you must define ASIO_STANDALONE in your compiler command.
+## Makefile
+If you would like to use the provided Makefile to compile Canvas++, simply follow the steps on the Makefile and run make. This should produce a working shared file library.
 ## Basic Example
 A basic example that sets mouse click and key press handlers. This example also shows how to add images and sounds. Finally, the example shows how to draw images onto the canvas using the CtxCommandBuilder and how to play sounds. Notice how the while loop will continue until the user closes the browser, and thus closes the connection.
 ```
@@ -99,7 +102,7 @@ int main() {
 ```
 
 ## Canvaspp
-The ShowCanvas() method has to use an OS specifc command in order to open your default browser. You must define your specifc OS in your compile command. Current possible OS are: WSL, WINDOWS, LINUX, and MACOS. One way to do this is using the "-D" flag.
+The ShowCanvas() method has to use an OS specifc command in order to open your default browser. You must define your specifc OS in your compile command. Current possible OS are: WSL, WINDOWS, LINUX, and MACOS. One way to do this is using the "-D" flag. This is the first step if you compile with the provided Makefile.
 
 Any media that you want to use in the GUI should be placed in the ui directory. The ui directory should be placed in your current working directory. When referencing that media object, the src/url should be a relative path as if the starting directory was the ui directory. For example, an image called smile.png in the ui directory would have this src/url: smile.png.
 ### void Start();
