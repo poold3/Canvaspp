@@ -22,6 +22,21 @@ void Canvaspp::SetSoundLoaded(const std::string& soundLoaded) {
   this->soundsLoaded.insert(soundLoaded);
 }
 
+void Canvaspp::SetTextMeasurement(const MeasuredText& measuredText) {
+  std::lock_guard<std::mutex> serverLock(this->measuredTextsMutex);
+  this->measuredTexts[measuredText.text] = measuredText.measurement;
+}
+
+void Canvaspp::SetPromptResponse(const PromptResponse& promptResponse) {
+  std::lock_guard<std::mutex> connectionLock(this->promptResponsesMutex);
+  this->promptResponses[promptResponse.key] = promptResponse.response;
+}
+
+void Canvaspp::SetConfirmResponse(const ConfirmResponse& confirmResponse) {
+  std::lock_guard<std::mutex> connectionLock(this->confirmResponsesMutex);
+  this->confirmResponses[confirmResponse.key] = confirmResponse.response;
+}
+
 void Canvaspp::MessageHandler(websocketpp::connection_hdl hdl, Server::message_ptr msg) {
   try {
     std::cout << msg->get_payload() << std::endl;
@@ -52,6 +67,12 @@ void Canvaspp::MessageHandler(websocketpp::connection_hdl hdl, Server::message_p
       this->SetImageLoaded(Input::GetImageLoaded(json));
     } else if (inputCode == INPUT_CODE::CODE::SOUND_LOADED) {
       this->SetSoundLoaded(Input::GetSoundLoaded(json));
+    } else if (inputCode == INPUT_CODE::CODE::MEASURED_TEXT) {
+      this->SetTextMeasurement(Input::GetMeasuredText(json));
+    } else if (inputCode == INPUT_CODE::CODE::PROMPT_RESPONSE) {
+      this->SetPromptResponse(Input::GetPromptResponse(json));
+    } else if (inputCode == INPUT_CODE::CODE::CONFIRM_RESPONSE) {
+      this->SetConfirmResponse(Input::GetConfirmResponse(json));
     }
 
   } catch(const std::exception& e) {
@@ -302,4 +323,71 @@ void Canvaspp::SetKeyDownHandler(KeyPressLambda keyDownLambda) {
 
 void Canvaspp::SetKeyUpHandler(KeyPressLambda keyUpLambda) {
   this->keyUpLambda = keyUpLambda;
+}
+
+bool Canvaspp::MeasureText(std::string text) {
+  std::lock_guard<std::mutex> serverLock(this->measuredTextsMutex);
+  this->measuredTexts[text] = -1;
+  Json json = Output::GetMeasureText(text);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+int Canvaspp::GetTextMeasurement(std::string text) {
+  std::lock_guard<std::mutex> serverLock(this->measuredTextsMutex);
+  if (this->measuredTexts.count(text) == 1) {
+    return this->measuredTexts.at(text);
+  } else {
+    return -1;
+  }
+}
+
+bool Canvaspp::Alert(std::string alert) {
+  Json json = Output::GetAlert(alert);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+bool Canvaspp::SetTitle(std::string title) {
+  Json json = Output::GetSetTitle(title);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+bool Canvaspp::SetFavicon(std::string href) {
+  Json json = Output::GetSetFavicon(href);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+bool Canvaspp::Prompt(std::string key, std::string prompt) {
+  std::lock_guard<std::mutex> serverLock(this->promptResponsesMutex);
+  this->promptResponses.erase(key);
+  Json json = Output::GetPrompt(key, prompt);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+std::pair<bool, std::string> Canvaspp::GetPromptResponse(std::string key) {
+  std::lock_guard<std::mutex> serverLock(this->promptResponsesMutex);
+  if (this->promptResponses.count(key) == 0) {
+    return std::pair<bool, std::string>(false, "");
+  }
+  return std::pair<bool, std::string>(true, this->promptResponses.at(key));
+}
+
+bool Canvaspp::Confirm(std::string key, std::string message) {
+  std::lock_guard<std::mutex> serverLock(this->confirmResponsesMutex);
+  this->confirmResponses.erase(key);
+  Json json = Output::GetConfirm(key, message);
+  std::string jsonStr = Canvaspp::JsonToStr(json);
+  return this->SendJSON(jsonStr);
+}
+
+std::pair<bool, bool> Canvaspp::GetConfirmResponse(std::string key) {
+  std::lock_guard<std::mutex> serverLock(this->confirmResponsesMutex);
+  if (this->confirmResponses.count(key) == 0) {
+    return std::pair<bool, bool>(false, false);
+  }
+  return std::pair<bool, bool>(true, this->confirmResponses.at(key));
 }

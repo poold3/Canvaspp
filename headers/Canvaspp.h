@@ -6,6 +6,7 @@
 #include <thread>
 #include <mutex>
 #include <set>
+#include <map>
 #include <stdexcept>
 #include <chrono>
 
@@ -35,6 +36,9 @@ private:
   std::mutex connectionsMutex;
   std::mutex imagesLoadedMutex;
   std::mutex soundsLoadedMutex;
+  std::mutex measuredTextsMutex;
+  std::mutex promptResponsesMutex;
+  std::mutex confirmResponsesMutex;
 
   // Canvas Properties
   Dimensions dimensions;
@@ -46,9 +50,12 @@ private:
   KeyPressLambda keyDownLambda = nullptr;
   KeyPressLambda keyUpLambda = nullptr;
 
-  // Image and Sound Loaded Storage
+  // Client Response Storage
   std::set<std::string> imagesLoaded;
   std::set<std::string> soundsLoaded;
+  std::map<std::string, int> measuredTexts;
+  std::map<std::string, std::string> promptResponses;
+  std::map<std::string, bool> confirmResponses;
 
   // Useful bools
   bool hasConnections = false;
@@ -70,6 +77,18 @@ private:
   /* Called by MessageHandler() when a sound has successfully loaded in the client.
   The sound can now be played. */
   void SetSoundLoaded(const std::string& soundLoaded);
+
+  /* Called by MessageHandler() when a string was successfully measured in the client.
+  The measurement can now be viewed. */
+  void SetTextMeasurement(const MeasuredText& measuredText);
+
+  /* Called by MessageHandler() when a prompt response was returned from the client.
+  The response can now be viewed. */
+  void SetPromptResponse(const PromptResponse& promptResponse);
+
+  /* Called by MessageHandler() when a confirm response was returned from the client.
+  The response can now be viewed. */
+  void SetConfirmResponse(const ConfirmResponse& confirmResponse);
 
   /* Handles all incoming messages from the client. Uses the INPUT_CODES to distinguish message type. */
   void MessageHandler(websocketpp::connection_hdl hdl, Server::message_ptr msg);
@@ -195,6 +214,51 @@ public:
   /* Sets the handler to be called when the user releases a pressed key. In order for this handler to be used,
   SetTrackKeyPress(true) must have been called. */
   void SetKeyUpHandler(KeyPressLambda keyUpLambda);
+
+  /* Instructs the client to measure the pixel length of a certain string.
+  Returns true if the command was successfully sent to the client. */
+  bool MeasureText(std::string text);
+
+  /* Returns the pixel measurement of a std::string if it has been received from the client.
+  Returns -1 if the measurement is unknown/has not been received yet. */
+  int GetTextMeasurement(std::string text);
+
+  /* Tells the client to call the window.alert() function with the provided std::string.
+  Returns true if the command was successfully sent to the client. */
+  bool Alert(std::string alert);
+
+  /* Sets the title of the client window.
+  Returns true if the command was successfully sent to the client. */
+  bool SetTitle(std::string title);
+
+  /* Sets the favicon of the client window. Not neccessary to use AddImage() first.
+  It is recommended to use a .ico file for favicons. The href is a relative path from the index.html file to the .ico file.
+  Returns true if the command was successfully sent to the client. */
+  bool SetFavicon(std::string href);
+
+  /* Tells the client to call the window.prompt() function with the provided std::string prompt.
+  The key will be used to store the response. Use GetPromptResponse() to access the client response.
+  Returns true if the command was successfully sent to the client. */
+  bool Prompt(std::string key, std::string prompt);
+
+  /* Returns the prompt response if it has been received from the client.
+  You must provide the key that was used in Prompt().
+  Returns an std::pair<bool, std::string>.
+  If the response is unknown/has not been received yet, the std::pair.first will be false.
+  Otherwise, the std::pair.first will be true, and the std::pair.second will contain the response. */
+  std::pair<bool, std::string> GetPromptResponse(std::string key);
+
+  /* Tells the client to call the window.confirm() function with the provided std::string message.
+  The key will be used to store the response. Use GetConfirmResponse() to access the client response.
+  Returns true if the command was successfully sent to the client. */
+  bool Confirm(std::string key, std::string message);
+
+  /* Returns the confirm response if it has been received from the client.
+  You must provide the key that was used in Confirm().
+  Returns an std::pair<bool, bool>.
+  If the response is unknown/has not been received yet, the std::pair.first will be false.
+  Otherwise, the std::pair.first will be true, and the std::pair.second will contain the response. */
+  std::pair<bool, bool> GetConfirmResponse(std::string key);
 };
 
 #endif

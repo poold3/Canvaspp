@@ -1,7 +1,7 @@
 #include "Input.h"
 
 INPUT_CODE::CODE Input::FindInputCode(int code) {
-  for (int i = static_cast<int>(INPUT_CODE::CODE::NONE); i <= static_cast<int>(INPUT_CODE::CODE::KEY_UP); ++i) {
+  for (int i = static_cast<int>(INPUT_CODE::CODE::NONE); i <= static_cast<int>(INPUT_CODE::CODE::CONFIRM_RESPONSE); ++i) {
     if (i == code) {
       return static_cast<INPUT_CODE::CODE>(i);
     }
@@ -80,4 +80,43 @@ std::string Input::GetKeyPress(const Json& json) {
   }
 
   return json.at("pressCode");
+}
+
+MeasuredText Input::GetMeasuredText(const Json& json) {
+  if (!json.at("text").is_string()) {
+    throw std::invalid_argument("The \"text\" field is not a string.");
+  } else if (!json.at("measurement").is_number()) {
+    throw std::invalid_argument("The \"measurement\" field is not a number.");
+  }
+
+  std::string text = json.at("text");
+  int measurement = json.at("measurement");
+
+  return MeasuredText(text, measurement);
+}
+
+PromptResponse Input::GetPromptResponse(const Json& json) {
+  if (!json.at("key").is_string()) {
+    throw std::invalid_argument("The \"key\" field is not a string.");
+  } else if (!json.at("response").is_string()) {
+    throw std::invalid_argument("The \"response\" field is not a string.");
+  }
+
+  std::string key = json.at("key");
+  std::string response = json.at("response");
+
+  return PromptResponse(key, response);
+}
+
+ConfirmResponse Input::GetConfirmResponse(const Json& json) {
+  if (!json.at("key").is_string()) {
+    throw std::invalid_argument("The \"key\" field is not a string.");
+  } else if (!json.at("response").is_boolean()) {
+    throw std::invalid_argument("The \"response\" field is not a bool.");
+  }
+
+  std::string key = json.at("key");
+  bool response = json.at("response");
+
+  return ConfirmResponse(key, response);
 }

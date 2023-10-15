@@ -22,7 +22,13 @@ namespace OUTPUT_CODE {
     ADD_SOUND,
     PLAY_SOUND,
     PAUSE_SOUND,
-    TRACK_KEY_PRESS
+    TRACK_KEY_PRESS,
+    MEASURE_TEXT,
+    ALERT,
+    SET_TITLE,
+    SET_FAVICON,
+    PROMPT,
+    CONFIRM
   };
 }
 
@@ -137,5 +143,23 @@ public:
 
   /* Returns a Json object with the correct OUTPUT_CODE and TRACK_KEY_PRESS value. */
   static Json GetTrackKeyPress(const bool& keyPress);
+
+  /* Returns a Json object with the correct OUTPUT_CODE and MEASURE_TEXT value. */
+  static Json GetMeasureText(const std::string& text);
+
+  /* Returns a Json object with the correct OUTPUT_CODE and ALERT value. */
+  static Json GetAlert(const std::string& alert);
+
+  /* Returns a Json object with the correct OUTPUT_CODE and SET_TITLE value. */
+  static Json GetSetTitle(const std::string& title);
+
+  /* Returns a Json object with the correct OUTPUT_CODE and SET_FAVICON value. */
+  static Json GetSetFavicon(const std::string& href);
+
+  /* Returns a Json object with the correct OUTPUT_CODE and PROMPT value. */
+  static Json GetPrompt(const std::string& key, const std::string& prompt);
+
+  /* Returns a Json object with the correct OUTPUT_CODE and CONFIRM value. */
+  static Json GetConfirm(const std::string& key, const std::string& message);
 };
 #endif

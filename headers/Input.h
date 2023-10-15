@@ -18,7 +18,10 @@ namespace INPUT_CODE {
     IMAGE_LOADED,
     SOUND_LOADED,
     KEY_DOWN,
-    KEY_UP
+    KEY_UP,
+    MEASURED_TEXT,
+    PROMPT_RESPONSE,
+    CONFIRM_RESPONSE
   };
 }
 
@@ -61,6 +64,45 @@ struct MouseClick {
   }
 };
 
+struct MeasuredText {
+  std::string text;
+  int measurement;
+  MeasuredText() {
+    this->text = "";
+    this->measurement = -1;
+  }
+  MeasuredText(std::string text, int measurement) {
+    this->text = text;
+    this->measurement = measurement;
+  }
+};
+
+struct PromptResponse {
+  std::string key;
+  std::string response;
+  PromptResponse() {
+    this->key = "";
+    this->response = "";
+  }
+  PromptResponse(std::string key, std::string response) {
+    this->key = key;
+    this->response = response;
+  }
+};
+
+struct ConfirmResponse {
+  std::string key;
+  bool response;
+  ConfirmResponse() {
+    this->key = "";
+    this->response = false;
+  }
+  ConfirmResponse(std::string key, bool response) {
+    this->key = key;
+    this->response = response;
+  }
+};
+
 class Input {
 public:
   /* Returns the INPUT_CODE that corresponds with the provided int. */
@@ -86,6 +128,15 @@ public:
 
   /* Returns a std::string with the correct KEY_DOWN or KEY_UP value. */
   static std::string GetKeyPress(const Json& json);
+
+  /* Returns a MeasuredText object with the correct MEASURED_TEXT value. */
+  static MeasuredText GetMeasuredText(const Json& json);
+
+  /* Returns a PromptResponse object with the correct PROMPT_RESPONSE value. */
+  static PromptResponse GetPromptResponse(const Json& json);
+
+  /* Returns a ConfirmResponse object with the correct CONFIRM_RESPONSE value. */
+  static ConfirmResponse GetConfirmResponse(const Json& json);
 };
 
 #endif

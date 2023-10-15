@@ -1,7 +1,7 @@
 #include "Output.h"
 
 OUTPUT_CODE::CODE Output::FindOutputCode(int code) {
-  for (int i = static_cast<int>(OUTPUT_CODE::CODE::NONE); i <= static_cast<int>(OUTPUT_CODE::CODE::TRACK_KEY_PRESS); ++i) {
+  for (int i = static_cast<int>(OUTPUT_CODE::CODE::NONE); i <= static_cast<int>(OUTPUT_CODE::CODE::CONFIRM); ++i) {
     if (i == code) {
       return static_cast<OUTPUT_CODE::CODE>(i);
     }
@@ -90,5 +90,49 @@ Json Output::GetTrackKeyPress(const bool& keyPress) {
   Json json;
   json["code"] = OUTPUT_CODE::CODE::TRACK_KEY_PRESS;
   json["track"] = keyPress;
+  return json;
+}
+
+Json Output::GetMeasureText(const std::string& text) {
+  Json json;
+  json["code"] = OUTPUT_CODE::CODE::MEASURE_TEXT;
+  json["text"] = text;
+  return json;
+}
+
+Json Output::GetAlert(const std::string& alert) {
+  Json json;
+  json["code"] = OUTPUT_CODE::CODE::ALERT;
+  json["alert"] = alert;
+  return json;
+}
+
+Json Output::GetSetTitle(const std::string& title) {
+  Json json;
+  json["code"] = OUTPUT_CODE::CODE::SET_TITLE;
+  json["title"] = title;
+  return json;
+}
+
+Json Output::GetSetFavicon(const std::string& href) {
+  Json json;
+  json["code"] = OUTPUT_CODE::CODE::SET_FAVICON;
+  json["href"] = href;
+  return json;
+}
+
+Json Output::GetPrompt(const std::string& key, const std::string& prompt) {
+  Json json;
+  json["code"] = OUTPUT_CODE::CODE::PROMPT;
+  json["key"] = key;
+  json["prompt"] = prompt;
+  return json;
+}
+
+Json Output::GetConfirm(const std::string& key, const std::string& message) {
+  Json json;
+  json["code"] = OUTPUT_CODE::CODE::CONFIRM;
+  json["key"] = key;
+  json["message"] = message;
   return json;
 }

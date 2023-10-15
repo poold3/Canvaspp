@@ -7,7 +7,10 @@ const OUTPUT_CODE = {
   IMAGE_LOADED: 5,
   SOUND_LOADED: 6,
   KEY_DOWN: 7,
-  KEY_UP: 8
+  KEY_UP: 8,
+  MEASURED_TEXT: 9,
+  PROMPT_RESPONSE: 10,
+  CONFIRM_RESPONSE: 11
 }
 
 const INPUT_CODE = {
@@ -21,7 +24,13 @@ const INPUT_CODE = {
   ADD_SOUND: 7,
   PLAY_SOUND: 8,
   PAUSE_SOUND: 9,
-  TRACK_KEY_PRESS: 10
+  TRACK_KEY_PRESS: 10,
+  MEASURE_TEXT: 11,
+  ALERT: 12,
+  SET_TITLE: 13,
+  SET_FAVICON: 14,
+  PROMPT: 15,
+  CONFIRM: 16
 }
 
 const images = {};
@@ -30,6 +39,8 @@ const keysDown = {};
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const title = document.getElementById("title");
+const favicon = document.getElementById("favicon");
 let socket = null;
 
 // Send a json string to the server.
@@ -109,6 +120,57 @@ function handleWebSocketMessage(event) {
       document.removeEventListener("keydown", trackKeyDown);
       document.removeEventListener("keyup", trackKeyUp);
     }
+  } else if (obj.code == INPUT_CODE.MEASURE_TEXT) {
+    measureText(obj.text);
+  } else if (obj.code == INPUT_CODE.ALERT) {
+    window.alert(obj.alert);
+  } else if (obj.code == INPUT_CODE.SET_TITLE) {
+    title.innerText = obj.title;
+  } else if (obj.code == INPUT_CODE.SET_FAVICON) {
+    favicon.href = obj.href;
+  } else if (obj.code == INPUT_CODE.PROMPT) {
+    sendPrompt(obj.key, obj.prompt);
+  } else if (obj.code == INPUT_CODE.CONFIRM) {
+    sendConfirm(obj.key, obj.message);
+  }
+}
+
+// Performs a window.prompt() and sends the response to the server.
+function sendPrompt(key, prompt) {
+  if (socket != null && socket.readyState == 1) {
+    const response = window.prompt(prompt);
+    const promptResponse = {
+      "code": OUTPUT_CODE.PROMPT_RESPONSE,
+      "key": key,
+      "response": response
+    };
+    sendToServer(promptResponse);
+  }
+}
+
+// Performs a window.confirm() and sends the response to the server.
+function sendConfirm(key, message) {
+  if (socket != null && socket.readyState == 1) {
+    const response = window.confirm(message);
+    const confirmResponse = {
+      "code": OUTPUT_CODE.CONFIRM_RESPONSE,
+      "key": key,
+      "response": response
+    };
+    sendToServer(confirmResponse);
+  }
+}
+
+// Send a text measurement to the server.
+function measureText(text) {
+  if (socket != null && socket.readyState == 1) {
+    const measurement = ctx.measureText(text).width;
+    const measuredText = {
+      "code": OUTPUT_CODE.MEASURED_TEXT,
+      "text": text,
+      "measurement": measurement
+    };
+    sendToServer(measuredText);
   }
 }
 
@@ -116,10 +178,10 @@ function handleWebSocketMessage(event) {
 function trackKeyDown(event) {
   if (socket != null && socket.readyState == 1 && (!Object.hasOwn(keysDown, event.code) || !keysDown[event.code])) {
     keysDown[event.code] = true;
-    keyPress = {
+    const keyPress = {
       "code": OUTPUT_CODE.KEY_DOWN,
       "pressCode": event.code,
-    }
+    };
     sendToServer(keyPress);
   }
 }
@@ -128,10 +190,10 @@ function trackKeyDown(event) {
 function trackKeyUp(event) {
   if (socket != null && socket.readyState == 1) {
     keysDown[event.code] = false;
-    keyPress = {
+    const keyPress = {
       "code": OUTPUT_CODE.KEY_UP,
       "pressCode": event.code,
-    }
+    };
     sendToServer(keyPress);
   }
 }
@@ -139,10 +201,10 @@ function trackKeyUp(event) {
 // Send confirmation to the server that a sound has loaded.
 function sendSoundLoaded(name) {
   if (socket != null && socket.readyState == 1) {
-    soundLoaded = {
+    const soundLoaded = {
       "code": OUTPUT_CODE.SOUND_LOADED,
       "name": name
-    }
+    };
     sendToServer(soundLoaded);
   }
 }
@@ -150,10 +212,10 @@ function sendSoundLoaded(name) {
 // Send confirmation to the server that an image has loaded.
 function sendImageLoaded(name) {
   if (socket != null && socket.readyState == 1) {
-    imageLoaded = {
+    const imageLoaded = {
       "code": OUTPUT_CODE.IMAGE_LOADED,
       "name": name
-    }
+    };
     sendToServer(imageLoaded);
   }
 }
@@ -161,11 +223,11 @@ function sendImageLoaded(name) {
 // Send a mouse click to the server.
 function trackMouseDown(event) {
   if (socket != null && socket.readyState == 1) {
-    mouseClick = {
+    const mouseClick = {
       "code": OUTPUT_CODE.MOUSE_DOWN,
       "x": event.clientX,
       "y": event.clientY
-    }
+    };
     sendToServer(mouseClick);
   }
 }
@@ -173,11 +235,11 @@ function trackMouseDown(event) {
 // Send a mouse click to the server when the mouse click is released.
 function trackMouseUp(event) {
   if (socket != null && socket.readyState == 1) {
-    mouseClick = {
+    const mouseClick = {
       "code": OUTPUT_CODE.MOUSE_UP,
       "x": event.clientX,
       "y": event.clientY
-    }
+    };
     sendToServer(mouseClick);
   }
 }
@@ -185,11 +247,11 @@ function trackMouseUp(event) {
 // Send the current mouse position to the server.
 function trackMousePosition(event) {
   if (socket != null && socket.readyState == 1) {
-    mousePosition = {
+    const mousePosition = {
       "code": OUTPUT_CODE.MOUSE_POSITION,
       "x": event.clientX,
       "y": event.clientY
-    }
+    };
     sendToServer(mousePosition);
   }
 }
@@ -199,11 +261,11 @@ function adjustCanvasSize() {
   canvas.width = window.innerWidth + 1;
   canvas.height = window.innerHeight + 1;
   if (socket != null && socket.readyState == 1) {
-    dimensions = {
+    const dimensions = {
       "code": OUTPUT_CODE.DIMENSIONS,
       "width": canvas.width,
       "height": canvas.height
-    }
+    };
     sendToServer(dimensions);
   }
 }
