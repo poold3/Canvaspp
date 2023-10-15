@@ -187,6 +187,42 @@ SetTrackKeyPress(true) must have been called.
 ### void SetKeyUpHandler(KeyPressLambda keyUpLambda);
 Sets the handler to be called when the user releases a pressed key. In order for this handler to be used,
 SetTrackKeyPress(true) must have been called.
+### bool MeasureText(std::string text);
+Instructs the client to measure the pixel length of a certain string.
+Returns true if the command was successfully sent to the client.
+### int GetTextMeasurement(std::string text);
+Returns the pixel measurement of a std::string if it has been received from the client.
+Returns -1 if the measurement is unknown/has not been received yet.
+### bool Alert(std::string alert);
+Tells the client to call the window.alert() function with the provided std::string.
+Returns true if the command was successfully sent to the client.
+### bool SetTitle(std::string title);
+Sets the title of the client window.
+Returns true if the command was successfully sent to the client.
+### bool SetFavicon(std::string href);
+Sets the favicon of the client window. Not neccessary to use AddImage() first.
+It is recommended to use a .ico file for favicons. The href is a relative path from the index.html file to the .ico file.
+Returns true if the command was successfully sent to the client.
+### bool Prompt(std::string key, std::string prompt);
+Tells the client to call the window.prompt() function with the provided std::string prompt.
+The key will be used to store the response. Use GetPromptResponse() to access the client response.
+Returns true if the command was successfully sent to the client.
+### std::pair<bool, std::string> GetPromptResponse(std::string key);
+Returns the prompt response if it has been received from the client.
+You must provide the key that was used in Prompt().
+Returns an std::pair<bool, std::string>.
+If the response is unknown/has not been received yet, the std::pair.first will be false.
+Otherwise, the std::pair.first will be true, and the std::pair.second will contain the response.
+### bool Confirm(std::string key, std::string message);
+Tells the client to call the window.confirm() function with the provided std::string message.
+The key will be used to store the response. Use GetConfirmResponse() to access the client response.
+Returns true if the command was successfully sent to the client.
+### std::pair<bool, bool> GetConfirmResponse(std::string key);
+Returns the confirm response if it has been received from the client.
+You must provide the key that was used in Confirm().
+Returns an std::pair<bool, bool>.
+If the response is unknown/has not been received yet, the std::pair.first will be false.
+Otherwise, the std::pair.first will be true, and the std::pair.second will contain the response.
 
 ## CtxCommandBuilder
 Most methods contained in the CtxCommandBuilder are chainable.
