@@ -76,7 +76,7 @@ CtxCommandBuilder& CtxCommandBuilder::imageSmoothingQuality(std::string quality)
   }
 }
 
-CtxCommandBuilder& CtxCommandBuilder::letterSpacing(int pixels) {
+CtxCommandBuilder& CtxCommandBuilder::letterSpacing(double pixels) {
   this->buffer.append("ctx.letterSpacing  = '" + std::to_string(pixels) + "px';");
   return *this;
 }
@@ -104,12 +104,12 @@ CtxCommandBuilder& CtxCommandBuilder::lineJoin(std::string join) {
   }
 }
 
-CtxCommandBuilder& CtxCommandBuilder::lineWidth(int width) {
+CtxCommandBuilder& CtxCommandBuilder::lineWidth(double width) {
   this->buffer.append("ctx.lineWidth = " + std::to_string(width) + ";");
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::miterLimit(int limit) {
+CtxCommandBuilder& CtxCommandBuilder::miterLimit(double limit) {
   this->buffer.append("ctx.miterLimit = " + std::to_string(limit) + ";");
   return *this;
 }
@@ -166,14 +166,14 @@ CtxCommandBuilder& CtxCommandBuilder::textRendering(std::string rendering) {
   }
 }
 
-CtxCommandBuilder& CtxCommandBuilder::wordSpacing(int pixels) {
+CtxCommandBuilder& CtxCommandBuilder::wordSpacing(double pixels) {
   this->buffer.append("ctx.wordSpacing = '" + std::to_string(pixels) + "px';");
   return *this;
 }
 
 // Instance Methods
 
-CtxCommandBuilder& CtxCommandBuilder::arc(int x, int y, int radius, double startAngle, double endAngle, bool counterclockwise) {
+CtxCommandBuilder& CtxCommandBuilder::arc(double x, double y, double radius, double startAngle, double endAngle, bool counterclockwise) {
   double startAngleRadians = (startAngle * PI) / 180.0;
   double endAngleRadians = (endAngle * PI) / 180.0;
   std::string counterclockwiseStr = (counterclockwise ? "true" : "false");
@@ -181,7 +181,7 @@ CtxCommandBuilder& CtxCommandBuilder::arc(int x, int y, int radius, double start
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::arcTo(int x1, int y1, int x2, int y2, int radius) {
+CtxCommandBuilder& CtxCommandBuilder::arcTo(double x1, double y1, double x2, double y2, double radius) {
   this->buffer.append("ctx.arcTo(" + std::to_string(x1) + "," + std::to_string(y1) + "," + std::to_string(x2) + "," + std::to_string(y2) + "," + std::to_string(radius) + ");");
   return *this;
 }
@@ -191,13 +191,13 @@ CtxCommandBuilder& CtxCommandBuilder::beginPath() {
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::bezierCurveTo(int cp1x, int cp1y, int cp2x, int cp2y, int x, int y) {
+CtxCommandBuilder& CtxCommandBuilder::bezierCurveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y) {
   this->buffer.append("ctx.bezierCurveTo(" + std::to_string(cp1x) + "," + std::to_string(cp1y) + "," + std::to_string(cp2x) + "," + std::to_string(cp2y) + "," + std::to_string(x) + "," + std::to_string(y) + ");");
   return *this;
 }
 
 
-CtxCommandBuilder& CtxCommandBuilder::clearRect(int x, int y, int width, int height) {
+CtxCommandBuilder& CtxCommandBuilder::clearRect(double x, double y, double width, double height) {
   this->buffer.append("ctx.clearRect(" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(width) + "," + std::to_string(height) + ");");
   return *this;
 }
@@ -207,17 +207,17 @@ CtxCommandBuilder& CtxCommandBuilder::closePath() {
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::drawImage(std::string imageName, int dx, int dy) {
+CtxCommandBuilder& CtxCommandBuilder::drawImage(std::string imageName, double dx, double dy) {
   this->buffer.append("ctx.drawImage(images." + imageName + "," + std::to_string(dx) + "," + std::to_string(dy) + ");");
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::drawImage(std::string imageName, int dx, int dy, int dWidth, int dHeight) {
+CtxCommandBuilder& CtxCommandBuilder::drawImage(std::string imageName, double dx, double dy, double dWidth, double dHeight) {
   this->buffer.append("ctx.drawImage(images." + imageName + "," + std::to_string(dx) + "," + std::to_string(dy) + "," + std::to_string(dWidth) + "," + std::to_string(dHeight) + ");");
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::drawImage(std::string imageName, int sx, int sy, int sWidth, int sHeight, int dx, int dy, int dWidth, int dHeight) {
+CtxCommandBuilder& CtxCommandBuilder::drawImage(std::string imageName, double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight) {
   this->buffer.append("ctx.drawImage(images." + imageName + "," + std::to_string(sx) + "," + std::to_string(sy) + "," + std::to_string(sWidth) + "," + std::to_string(sHeight) + "," + std::to_string(dx) + "," + std::to_string(dy) + "," + std::to_string(dWidth) + "," + std::to_string(dHeight) + ");");
   return *this;
 }
@@ -228,12 +228,12 @@ CtxCommandBuilder& CtxCommandBuilder::fill() {
 }
 
 
-CtxCommandBuilder& CtxCommandBuilder::fillRect(int x, int y, int width, int height) {
+CtxCommandBuilder& CtxCommandBuilder::fillRect(double x, double y, double width, double height) {
   this->buffer.append("ctx.fillRect(" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(width) + "," + std::to_string(height) + ");");
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::fillText(std::string text, int x, int y, int maxWidth) {
+CtxCommandBuilder& CtxCommandBuilder::fillText(std::string text, double x, double y, double maxWidth) {
   if (maxWidth == 0) {
     this->buffer.append("ctx.fillText(" + text + "," + std::to_string(x) + "," + std::to_string(y) + ");");
   } else {
@@ -242,23 +242,23 @@ CtxCommandBuilder& CtxCommandBuilder::fillText(std::string text, int x, int y, i
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::lineTo(int x, int y) {
+CtxCommandBuilder& CtxCommandBuilder::lineTo(double x, double y) {
   this->buffer.append("ctx.lineTo(" + std::to_string(x) + "," + std::to_string(y) + ");");
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::moveTo(int x, int y) {
+CtxCommandBuilder& CtxCommandBuilder::moveTo(double x, double y) {
   this->buffer.append("ctx.moveTo(" + std::to_string(x) + "," + std::to_string(y) + ");");
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::quadraticCurveTo(int cpx, int cpy, int x, int y) {
+CtxCommandBuilder& CtxCommandBuilder::quadraticCurveTo(double cpx, double cpy, double x, double y) {
   this->buffer.append("ctx.quadraticCurveTo(" + std::to_string(cpx) + "," + std::to_string(cpy) + "," + std::to_string(x) + "," + std::to_string(y) + ");");
   return *this;
 }
 
 
-CtxCommandBuilder& CtxCommandBuilder::rect(int x, int y, int width, int height) {
+CtxCommandBuilder& CtxCommandBuilder::rect(double x, double y, double width, double height) {
   this->buffer.append("ctx.rect(" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(width) + "," + std::to_string(height) + ");");
   return *this;
 }
@@ -285,7 +285,7 @@ CtxCommandBuilder& CtxCommandBuilder::rotate(double degrees) {
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::roundRect(int x, int y, int width, int height, int radii) {
+CtxCommandBuilder& CtxCommandBuilder::roundRect(double x, double y, double width, double height, double radii) {
   this->buffer.append("ctx.roundRect(" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(width) + "," + std::to_string(height) + "," + std::to_string(radii) + ");");
   return *this;
 }
@@ -295,12 +295,12 @@ CtxCommandBuilder& CtxCommandBuilder::save() {
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::scale(int x, int y) {
+CtxCommandBuilder& CtxCommandBuilder::scale(double x, double y) {
   this->buffer.append("ctx.scale(" + std::to_string(x) + "," + std::to_string(y) + ");");
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::setLineDash(int segments[], int segmentsLength) {
+CtxCommandBuilder& CtxCommandBuilder::setLineDash(double segments[], int segmentsLength) {
   this->buffer.append("ctx.setLineDash([");
   for (int i = 0; i < segmentsLength; ++i) {
     if (i != 0) {
@@ -322,12 +322,12 @@ CtxCommandBuilder& CtxCommandBuilder::stroke() {
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::strokeRect(int x, int y, int width, int height) {
+CtxCommandBuilder& CtxCommandBuilder::strokeRect(double x, double y, double width, double height) {
   this->buffer.append("ctx.strokeRect(" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(width) + "," + std::to_string(height) + ");");
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::strokeText(std::string text, int x, int y, int maxWidth) {
+CtxCommandBuilder& CtxCommandBuilder::strokeText(std::string text, double x, double y, double maxWidth) {
   if (maxWidth == 0) {
     this->buffer.append("ctx.strokeText(" + text + "," + std::to_string(x) + "," + std::to_string(y) + ");");
   } else {
@@ -341,7 +341,7 @@ CtxCommandBuilder& CtxCommandBuilder::transform(double a, double b, double c, do
   return *this;
 }
 
-CtxCommandBuilder& CtxCommandBuilder::translate(int x, int y) {
+CtxCommandBuilder& CtxCommandBuilder::translate(double x, double y) {
   this->buffer.append("ctx.translate(" + std::to_string(x) + "," + std::to_string(y) + ");");
   return *this;
 }

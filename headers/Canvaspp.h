@@ -9,6 +9,7 @@
 #include <map>
 #include <stdexcept>
 #include <chrono>
+#include <functional>
 
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
@@ -20,8 +21,8 @@
 using Json = nlohmann::json;
 
 typedef websocketpp::server<websocketpp::config::asio> Server;
-typedef void(*MouseClickLambda)(MouseClick mouseClick);
-typedef void(*KeyPressLambda)(std::string keyPress);
+typedef std::function<void(MouseClick)> MouseClickLambda;
+typedef std::function<void(std::string)> KeyPressLambda;
 
 class Canvaspp {
 private:

@@ -52,7 +52,7 @@ public:
   CtxCommandBuilder& imageSmoothingQuality(std::string quality);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/letterSpacing */
-  CtxCommandBuilder& letterSpacing(int pixels);
+  CtxCommandBuilder& letterSpacing(double pixels);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/lineCap */
   CtxCommandBuilder& lineCap(std::string cap);
@@ -64,10 +64,10 @@ public:
   CtxCommandBuilder& lineJoin(std::string join);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/lineWidth */
-  CtxCommandBuilder& lineWidth(int width);
+  CtxCommandBuilder& lineWidth(double width);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/miterLimit */
-  CtxCommandBuilder& miterLimit(int limit);
+  CtxCommandBuilder& miterLimit(double limit);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/shadowBlur */
   CtxCommandBuilder& shadowBlur(double blur);
@@ -94,56 +94,56 @@ public:
   CtxCommandBuilder& textRendering(std::string rendering);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/wordSpacing */
-  CtxCommandBuilder& wordSpacing(int pixels);
+  CtxCommandBuilder& wordSpacing(double pixels);
 
   // ctx instance methods
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/arc */
-  CtxCommandBuilder& arc(int x, int y, int radius, double startAngle, double endAngle, bool counterclockwise = false);
+  CtxCommandBuilder& arc(double x, double y, double radius, double startAngle, double endAngle, bool counterclockwise = false);
   
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/arcTo */
-  CtxCommandBuilder& arcTo(int x1, int y1, int x2, int y2, int radius);
+  CtxCommandBuilder& arcTo(double x1, double y1, double x2, double y2, double radius);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/beginPath */
   CtxCommandBuilder& beginPath();
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/bezierCurveTo */
-  CtxCommandBuilder& bezierCurveTo(int cp1x, int cp1y, int cp2x, int cp2y, int x, int y);
+  CtxCommandBuilder& bezierCurveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/clearRect */
-  CtxCommandBuilder& clearRect(int x, int y, int width, int height);
+  CtxCommandBuilder& clearRect(double x, double y, double width, double height);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/closePath */
   CtxCommandBuilder& closePath();
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage */
-  CtxCommandBuilder& drawImage(std::string imageName, int dx, int dy);
+  CtxCommandBuilder& drawImage(std::string imageName, double dx, double dy);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage */
-  CtxCommandBuilder& drawImage(std::string imageName, int dx, int dy, int dWidth, int dHeight);
+  CtxCommandBuilder& drawImage(std::string imageName, double dx, double dy, double dWidth, double dHeight);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage */
-  CtxCommandBuilder& drawImage(std::string imageName, int sx, int sy, int sWidth, int sHeight, int dx, int dy, int dWidth, int dHeight);
+  CtxCommandBuilder& drawImage(std::string imageName, double sx, double sy, double sWidth, double sHeight, double dx, double dy, double dWidth, double dHeight);
   
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fill */
   CtxCommandBuilder& fill();
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillRect */
-  CtxCommandBuilder& fillRect(int x, int y, int width, int height);
+  CtxCommandBuilder& fillRect(double x, double y, double width, double height);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillText */
-  CtxCommandBuilder& fillText(std::string text, int x, int y, int maxWidth = 0);
+  CtxCommandBuilder& fillText(std::string text, double x, double y, double maxWidth = 0);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/lineTo */
-  CtxCommandBuilder& lineTo(int x, int y);
+  CtxCommandBuilder& lineTo(double x, double y);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/moveTo */
-  CtxCommandBuilder& moveTo(int x, int y);
+  CtxCommandBuilder& moveTo(double x, double y);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/quadraticCurveTo */
-  CtxCommandBuilder& quadraticCurveTo(int cpx, int cpy, int x, int y);
+  CtxCommandBuilder& quadraticCurveTo(double cpx, double cpy, double x, double y);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/rect */
-  CtxCommandBuilder& rect(int x, int y, int width, int height);
+  CtxCommandBuilder& rect(double x, double y, double width, double height);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/reset */
   CtxCommandBuilder& reset();
@@ -158,16 +158,16 @@ public:
   CtxCommandBuilder& rotate(double degrees);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/roundRect */
-  CtxCommandBuilder& roundRect(int x, int y, int width, int height, int radii);
+  CtxCommandBuilder& roundRect(double x, double y, double width, double height, double radii);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/save */
   CtxCommandBuilder& save();
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/scale */
-  CtxCommandBuilder& scale(int x, int y);
+  CtxCommandBuilder& scale(double x, double y);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setLineDash */
-  CtxCommandBuilder& setLineDash(int segments[], int segmentsLength);
+  CtxCommandBuilder& setLineDash(double segments[], int segmentsLength);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setTransform */
   CtxCommandBuilder& setTransform(double a, double b, double c, double d, double e, double f);
@@ -176,16 +176,16 @@ public:
   CtxCommandBuilder& stroke();
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/strokeRect */
-  CtxCommandBuilder& strokeRect(int x, int y, int width, int height);
+  CtxCommandBuilder& strokeRect(double x, double y, double width, double height);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/strokeText */
-  CtxCommandBuilder& strokeText(std::string text, int x, int y, int maxWidth = 0);
+  CtxCommandBuilder& strokeText(std::string text, double x, double y, double maxWidth = 0);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/transform */
   CtxCommandBuilder& transform(double a, double b, double c, double d, double e, double f);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/translate */
-  CtxCommandBuilder& translate(int x, int y);
+  CtxCommandBuilder& translate(double x, double y);
 };
 
 #endif
