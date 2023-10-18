@@ -131,7 +131,7 @@ public:
   CtxCommandBuilder& fillRect(double x, double y, double width, double height);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillText */
-  CtxCommandBuilder& fillText(std::string text, double x, double y, double maxWidth = 0);
+  CtxCommandBuilder& fillText(std::string text, double x, double y, double maxWidth = 0.0);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/lineTo */
   CtxCommandBuilder& lineTo(double x, double y);
@@ -179,7 +179,7 @@ public:
   CtxCommandBuilder& strokeRect(double x, double y, double width, double height);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/strokeText */
-  CtxCommandBuilder& strokeText(std::string text, double x, double y, double maxWidth = 0);
+  CtxCommandBuilder& strokeText(std::string text, double x, double y, double maxWidth = 0.0);
 
   /* https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/transform */
   CtxCommandBuilder& transform(double a, double b, double c, double d, double e, double f);
