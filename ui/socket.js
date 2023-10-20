@@ -33,6 +33,16 @@ const INPUT_CODE = {
   CONFIRM: 16
 }
 
+const animationQueue = {
+  queue: new Array(),
+  push: function(command) {
+    this.queue.push(command);
+  },
+  getNext: function() {
+    return this.queue.shift();
+  }
+}
+
 const images = {};
 const sounds = {};
 const keysDown = {};
@@ -50,12 +60,22 @@ function sendToServer(object) {
   }
 }
 
+// The step function used in requestAnimationFrame
+function animationStep() {
+  const command = animationQueue.getNext();
+  if (command) {
+    const commandFunction = new Function(command);
+    commandFunction();
+  }
+  window.requestAnimationFrame(animationStep);
+}
+
 // Handle messages/commands from the server.
 function handleWebSocketMessage(event) {
   const obj = JSON.parse(event.data);
   if (obj.code == INPUT_CODE.CTX_COMMAND) {
-    eval?.(`"use strict";${obj.command}`);
-
+    animationQueue.push(obj.command);
+    
   } else if (obj.code == INPUT_CODE.TRACK_MOUSE_POSITION) {
     if (obj.track == true) {
       canvas.addEventListener("mousemove", trackMousePosition);
@@ -258,8 +278,11 @@ function trackMousePosition(event) {
 
 // Resize the canvas and send new size to the server.
 function adjustCanvasSize() {
+  console.log(window.innerWidth + 1);
   canvas.width = window.innerWidth + 1;
   canvas.height = window.innerHeight + 1;
+  console.log(canvas.width);
+  console.log(window.innerWidth);
   if (socket != null && socket.readyState == 1) {
     const dimensions = {
       "code": OUTPUT_CODE.DIMENSIONS,
@@ -288,8 +311,8 @@ function connectWebSocket() {
     console.log('WebSocket connection opened:', event);
 
     socket.addEventListener('message', handleWebSocketMessage);
-
     adjustCanvasSize();
+    window.requestAnimationFrame(animationStep);
   });
 
   // Window will close if socket connection closes.
