@@ -105,6 +105,9 @@ int main() {
 The ShowCanvas() method has to use an OS specifc command in order to open your default browser. You must define your specifc OS in your compile command. Current possible OS are: WSL, WINDOWS, LINUX, and MACOS. One way to do this is using the "-D" flag. This is the first step if you compile with the provided Makefile.
 
 Any media that you want to use in the GUI should be placed in the ui directory. The ui directory should be placed in your current working directory. When referencing that media object, the src/url should be a relative path as if the starting directory was the ui directory. For example, an image called smile.png in the ui directory would have this src/url: smile.png.
+### static constexpr int IDEAL_ANIMATION_RATE = 16667;
+The ideal animation rate for web browsers is 60 fps which is around 1 frame every 16667 microseconds.
+
 ### void Start();
 Server starts listening on port 65000 and begins accepting connections.
 this->serverThread is used to run the server.

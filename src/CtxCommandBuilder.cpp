@@ -235,9 +235,9 @@ CtxCommandBuilder& CtxCommandBuilder::fillRect(double x, double y, double width,
 
 CtxCommandBuilder& CtxCommandBuilder::fillText(std::string text, double x, double y, double maxWidth) {
   if (maxWidth == 0) {
-    this->buffer.append("ctx.fillText(" + text + "," + std::to_string(x) + "," + std::to_string(y) + ");");
+    this->buffer.append("ctx.fillText('" + text + "'," + std::to_string(x) + "," + std::to_string(y) + ");");
   } else {
-    this->buffer.append("ctx.fillText(" + text + "," + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(maxWidth) + ");");
+    this->buffer.append("ctx.fillText('" + text + "'," + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(maxWidth) + ");");
   }
   return *this;
 }
@@ -329,9 +329,9 @@ CtxCommandBuilder& CtxCommandBuilder::strokeRect(double x, double y, double widt
 
 CtxCommandBuilder& CtxCommandBuilder::strokeText(std::string text, double x, double y, double maxWidth) {
   if (maxWidth == 0) {
-    this->buffer.append("ctx.strokeText(" + text + "," + std::to_string(x) + "," + std::to_string(y) + ");");
+    this->buffer.append("ctx.strokeText('" + text + "'," + std::to_string(x) + "," + std::to_string(y) + ");");
   } else {
-    this->buffer.append("ctx.strokeText(" + text + "," + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(maxWidth) + ");");
+    this->buffer.append("ctx.strokeText('" + text + "'," + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(maxWidth) + ");");
   }
   return *this;
 }

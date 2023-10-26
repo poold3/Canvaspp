@@ -37,6 +37,9 @@ const animationQueue = {
   queue: new Array(),
   push: function(command) {
     this.queue.push(command);
+    if (this.queue.length >= 5) {
+      this.queue.splice(0, this.queue.length - 2);
+    }
   },
   getNext: function() {
     return this.queue.shift();

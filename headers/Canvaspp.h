@@ -102,6 +102,9 @@ private:
   All json strings should have a "code" field wih an OUTPUT_CODE and the corresponding information. */
   bool SendJSON(const std::string jsonStr);
 public:
+  // The ideal animation rate for web browsers is 60 fps which is around 1 frame every 16667 microseconds.
+  static constexpr int IDEAL_ANIMATION_RATE = 16667;
+
   /* Sets server channels and server handlers. Performs basic server initiation. */
   Canvaspp();
 
