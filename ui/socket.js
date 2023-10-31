@@ -117,6 +117,7 @@ function handleWebSocketMessage(event) {
         newSound.removeEventListener("canplaythrough", eventHandler);
       }
       newSound.addEventListener("canplaythrough", eventHandler);
+      newSound.setAttribute("preload", "auto");
       newSound.setAttribute("src", obj.src);
       newSound.volume = obj.volume;
       newSound.playbackRate = obj.playbackRate;
